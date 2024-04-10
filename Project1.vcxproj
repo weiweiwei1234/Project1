@@ -127,12 +127,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BigNumber.cpp" />
     <ClCompile Include="ECC.cpp" />
     <ClCompile Include="SM2.cpp" />
     <ClCompile Include="SM2.h" />
     <ClCompile Include="SM3.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BigNumber.h" />
     <ClInclude Include="SM3.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -279,7 +279,7 @@ string iteration(string str) {//迭代压缩函数实现
 	return V;
 }
 
-string SM3(string str) {
+string SM3Hash(string str) {
 	return iteration(padding(str));
 }
 
