@@ -21,15 +21,21 @@
     <ClCompile Include="ECC.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SM2.h">
+    <ClCompile Include="EllipticCurve.h">
       <Filter>头文件</Filter>
     </ClCompile>
-    <ClCompile Include="SM2.cpp">
+    <ClCompile Include="EllipticCurve.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BigNumber.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SM3.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BigNumber.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

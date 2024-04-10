@@ -1,3 +1,4 @@
+//使用sm3算法计算hash值
 #pragma once
 #include <iostream>
 #include <string>
@@ -26,4 +27,4 @@ string GG(string str1, string str2, string str3, int j);//实现布尔函数GG功能
 string extension(string str);							//消息扩展函数
 string compress(string str1, string str2);				//消息压缩函数
 string iteration(string str);							//迭代压缩函数实现
-string SM3(string str);									//生成杂凑值
+string SM3Hash(string str);								//生成杂凑值
