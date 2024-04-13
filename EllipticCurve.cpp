@@ -26,6 +26,8 @@ bool is_in_params(ECPoint point, ECParams params)
 //求 P + Q
 ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params)
 {
+	if (P.x == 0 && P.y == 0) return Q;
+	if (Q.x == 0 && Q.y == 0) return P;
 	ECPoint R; //R=P+Q
 	BigNumber x1, x2, x3, y1, y2, y3, a, b, p;
 	x1 = P.x;
@@ -58,17 +60,57 @@ ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params)
 }
 
 //求 kP
-ECPoint ecpoint_mul_1(BigNumber k, ECPoint P, ECParams params)
+//朴素乘法 1-k 非常慢
+ECPoint ecpoint_mul_1(BigNumber k, ECPoint P, ECParams C)
 {
-	//朴素乘法 1-k 非常慢
+	if (k == 0) return { BigNumber(0), BigNumber(0) };
+	if (k == 1) return P;
 	ECPoint R = P;
-	BigNumber p = params.p;
-	k = (k % p + p) % p; //转化k为正值
-	k = k - 1;
-	while (k > 0) {
-		R = ecpoint_add(R, P,params);
+	while (k > 1) {
+		R = ecpoint_add(R, P,C);
 		k = k - 1;
 	}
+	return R;
+}
+//将k二进制表示
+ECPoint ecpoint_mul_2(BigNumber k, ECPoint P, ECParams C)
+{
+	if (k == 0) return { BigNumber(0), BigNumber(0) };
+	if (k == 1) return P;
+	ECPoint R = {BigNumber(0),BigNumber(0)};
+	ECPoint L = P;
+	BigNumber k2 = k;
+	while (k2 % 2 == 0) {
+		k2 = k2 / 2;
+		L = ecpoint_add(L, L, C);
+	}
+	while (k2 > 0) {
+		if (k2 % 2 == 1) {
+			R = ecpoint_add(R, L, C);
+		}
+		L = ecpoint_add(L, L, C);
+		k2 = k2 / 2;
+	}
+	return R;
+}
+//使用NAF算法(比二进制表示好点)
+//标量的非相邻表示称为NAF
+//定义：一个正整数k的非相邻表示型是表达式, 其中, 并且没有两个连续的数字ki是非零的, NAF的长度是l.
+//NAF的性质：
+//1 k有唯一的NAF, 并记作NAF(k)。
+//2 NAF(k)在k 的所有带符号表示中具有最少的非零位。
+//3 NAF(k)的长度最多比k的二进制表示的长度大1.
+//4 若NAF(k)的长度是l, 则2l / 3 < k < 2(l + 1) / 3.
+//5 所有长度为l的NAF中非零数字的平均密度约为1 / 3.
+
+ECPoint ecpoint_mul_NAF(BigNumber k, ECPoint P, ECParams C)
+{
+	if (k == 0) return { BigNumber(0), BigNumber(0) };
+	if (k == 1) return P;
+	ECPoint R = { BigNumber(0),BigNumber(0) };
+	ECPoint L = P;
+	BigNumber k2 = k;
+
 	return R;
 }
 

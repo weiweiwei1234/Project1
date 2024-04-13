@@ -34,8 +34,9 @@ bool is_in_params(ECPoint point, ECParams params);	//判断点是否在椭圆曲线上
 ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params);	//两点加
 
 //点乘算法实现
-ECPoint ecpoint_mul_1(BigNumber k, ECPoint P, ECParams params);	
-ECPoint ecpoint_mul_2(BigNumber k, ECPoint P, ECParams params);	
+ECPoint ecpoint_mul_1(BigNumber k, ECPoint P, ECParams C);		
+ECPoint ecpoint_mul_2(BigNumber k, ECPoint P, ECParams C);
+ECPoint ecpoint_mul_NAF(BigNumber k, ECPoint P, ECParams C);
 
 //拓展gcd求逆元 a * a^-1 = 1 (mod b)
 BigNumber exgcd(BigNumber a, BigNumber b, BigNumber& x, BigNumber& y);
