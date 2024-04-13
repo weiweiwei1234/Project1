@@ -30,6 +30,9 @@
     <ClCompile Include="BigNumber.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="BigNumber.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SM3.h">

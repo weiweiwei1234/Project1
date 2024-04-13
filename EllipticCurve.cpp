@@ -60,7 +60,7 @@ ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params)
 //求 kP
 ECPoint ecpoint_mul_1(BigNumber k, ECPoint P, ECParams params)
 {
-	//朴素乘法1-k 非常慢
+	//朴素乘法 1-k 非常慢
 	ECPoint R = P;
 	BigNumber p = params.p;
 	k = (k % p + p) % p; //转化k为正值
