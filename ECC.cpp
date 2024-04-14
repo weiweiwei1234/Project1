@@ -1,6 +1,7 @@
 #include "SM3.h"
 #include "EllipticCurve.h"
 #include "BigNumber.h"
+#include <windows.h>
 //椭圆曲线方程：y2 = x3 + ax + b。
 int main() {
 	BigNumber p("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF");
@@ -53,21 +54,46 @@ int main() {
 	else {
 		cout << "P5不在椭圆曲线上\n" << endl;
 	}
-	ECPoint P5_ = ecpoint_mul_1(5, G, C);
-	print_ecpoint(P5_);
-	BigNumber k("FFE");
+
+	ECPoint P6 = ecpoint_add_(P3, P3, C);
+	print_ecpoint(P6);
+	if (is_in_params(P6, C) == 1) {
+		cout << "P6在椭圆曲线上\n" << endl;
+	}
+	else {
+		cout << "P6不在椭圆曲线上\n" << endl;
+	}
+
+	ECPoint P6_ = ecpoint_mul_1(6, G, C);
+	print_ecpoint(P6_);
+	BigNumber k("FFFE");
 
 	/*cout << "使用朴素点乘:" << endl;
 	ECPoint Pk1 = ecpoint_mul_1(k, G, C);
 	print_ecpoint(Pk1);*/
 
+	long t1,t2;//计算运行时间，t1:开始时间,t2:结束时间
+
 	cout << "将k二进制表示:" << endl;
+	t1 = GetTickCount64();
 	ECPoint Pk2 = ecpoint_mul_BIN(k, G, C);
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
 	print_ecpoint(Pk2);
 
-	cout << "使用NAF乘法:" << endl;
+	cout << "使用NAF乘法(仿射坐标）:" << endl;
+	t1 = GetTickCount64();
 	ECPoint Pk3 = ecpoint_mul_NAF(k, G, C);
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
 	print_ecpoint(Pk3);
+
+	cout << "使用NAF乘法(射影坐标）:" << endl;
+	t1 = GetTickCount64();
+	ECPoint Pk4 = ecpoint_mul_NAF_(k, G, C);
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
+	print_ecpoint(Pk4);
 
 	cout << "以上为测试内容。" << endl;
 	return 0;

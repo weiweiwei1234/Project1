@@ -41,18 +41,77 @@ ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params)
 		cout << "P、Q必须在椭圆曲线上" << endl;
 	BigNumber k;	//斜率k
 	if (P.x != Q.x) {
-		k = ((y2 - y1) * mod_inverse(x2 - x1, p)) % p;
+		k = (y2 - y1) * mod_inverse(x2 - x1, p);
 	}
 	else {
-		k = ((3 * x1 * x1 + a) * mod_inverse(2 * y1 , p)) % p;
+		k = (3 * x1 * x1 + a) * mod_inverse(2 * y1 , p);
 	}
-	x3 = (k * k - x1 - x2) % p;
-	y3 = (k * (x1 - x3) - y1) % p;
-	x3 = (x3 % p + p) % p;
-	y3 = (y3 % p + p) % p;
+	x3 = k * k - x1 - x2;
+	y3 = k * (x1 - x3) - y1;
 	R.x = x3;
 	R.y = y3;
+	R.x = (x3 % p + p) % p;
+	R.y = (y3 % p + p) % p;
 	if (is_in_params(R, params) == 1)
+		cout << "结果正确!" << endl;
+	else
+		cout << "结果错误!" << endl;
+	return R;
+}
+
+//标准射影坐标的两点加
+ECPoint ecpoint_add_(ECPoint P, ECPoint Q, ECParams C)
+{
+	if (P.x == 0 && P.y == 0) return Q;
+	if (Q.x == 0 && Q.y == 0) return P;
+	ECPoint R;
+	BigNumber x1, x2, x3, y1, y2, y3, z1, z2, z3, a, b, p;
+	x1 = P.x;
+	y1 = P.y;
+	z1 = 1;
+	x2 = Q.x;
+	y2 = Q.y;
+	z2 = 1;
+	a = C.a;
+	b = C.b;
+	p = C.p;
+	if (P.x != Q.x && P.y != Q.y) {
+		BigNumber t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11;
+		t1 = x1 * z2;
+		t2 = x2 * z1;
+		t3 = t1 - t2;
+		t4 = y1 * z2;
+		t5 = y2 * z1;
+		t6 = t4 - t5;
+		t7 = t1 + t2;
+		t8 = z1 * z2;
+		t9 = t3 * t3;
+		t10 = t3 * t9;
+		t11 = t8 * t6 * t6 - t7 * t9;
+		//得到R的射影坐标
+		x3 = t3 * t11;
+		y3 = t6 * (t9 * t1 - t11) - t4 * t10;
+		z3 = t10 * t8;
+	}
+	else {
+		BigNumber t1, t2, t3, t4, t5, t6;
+		t1 = 3 * x1 * x1 + a * z1 * z1;
+		t2 = 2 * y1 * z1;
+		t3 = y1 * y1;
+		t4 = t3 * x1 * z1;
+		t5 = t2 * t2;
+		t6 = t1 * t1 - 8 * t4;
+		//得到R的射影坐标
+		x3 = t2 * t6;
+		y3 = t1 * (4 * t4 - t6) - 2 * t5 * t3;
+		z3 = t2 * t5;
+	}
+	//转换为仿射坐标
+	R.x = x3 * mod_inverse(z3, p) % p;
+	R.y = y3 * mod_inverse(z3, p) % p;
+	R.x = (R.x % p + p) % p;
+	R.y = (R.y % p + p) % p;
+	if (is_in_params(R, C) == 1)
 		cout << "结果正确!" << endl;
 	else
 		cout << "结果错误!" << endl;
@@ -137,6 +196,49 @@ ECPoint ecpoint_mul_NAF(BigNumber k, ECPoint P, ECParams C)
 			R = ecpoint_add(R, _P, C);
 	}
 	return R;
+}
+
+//射影坐标
+ECPoint ecpoint_mul_NAF_(BigNumber k, ECPoint P, ECParams C)
+{
+	if (k == 0) return { BigNumber(0), BigNumber(0) };
+	if (k == 1) return P;
+	ECPoint R = { BigNumber(0),BigNumber(0) };
+	ECPoint _P = { P.x,0 - P.y }; //-P
+	BigNumber k1 = k;
+	//计算k的NAF值
+	int i = 0;
+	BigNumber NAF_k[1025];
+	while (k1 >= 1) {
+		if (k1 % 2 == 1) {
+			NAF_k[i] = 2 - (k1 % 4);
+			k1 = k1 - NAF_k[i];
+		}
+		else {
+			NAF_k[i] = 0;
+		}
+		k1 = k1 / 2;
+		i++;
+	}
+	cout << k << "的NAF表示为：";
+	int j;
+	for (j = i - 1; j >= 0; j--) {
+		cout << NAF_k[j];
+	}
+	cout << endl;
+	for (j = i - 1; j >= 0; j--) {
+		R = ecpoint_add(R, R, C);
+		if (NAF_k[j] == 1)
+			R = ecpoint_add_(R, P, C);
+		if (NAF_k[j] == -1)
+			R = ecpoint_add_(R, _P, C);
+	}
+	return R;
+}
+
+ECPoint ecpoint_mul_4(BigNumber k, ECPoint P, ECParams C)
+{
+	return ECPoint();
 }
 
 //求最大公约数的同时求 ax + by = gcd(a,b) 的解
