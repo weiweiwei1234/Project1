@@ -55,19 +55,19 @@ int main() {
 	}
 	ECPoint P5_ = ecpoint_mul_1(5, G, C);
 	print_ecpoint(P5_);
-	BigNumber k("FFFF");
+	BigNumber k("FFE");
 
 	/*cout << "使用朴素点乘:" << endl;
 	ECPoint Pk1 = ecpoint_mul_1(k, G, C);
 	print_ecpoint(Pk1);*/
 
 	cout << "将k二进制表示:" << endl;
-	ECPoint Pk2 = ecpoint_mul_2(k, G, C);
+	ECPoint Pk2 = ecpoint_mul_BIN(k, G, C);
 	print_ecpoint(Pk2);
 
-	//cout << "使用NAF乘法:" << endl;
-	//ECPoint Pk3 = ecpoint_mul_NAF(k, G, C);
-	//print_ecpoint(Pk3);
+	cout << "使用NAF乘法:" << endl;
+	ECPoint Pk3 = ecpoint_mul_NAF(k, G, C);
+	print_ecpoint(Pk3);
 
 	cout << "以上为测试内容。" << endl;
 	return 0;

@@ -1,5 +1,5 @@
 #include "EllipticCurve.h"
-
+#include "SM3.h"
 void print_ecparams(ECParams params)
 {
 	cout << "椭圆曲线的有限域p：" << params.p << endl;
@@ -73,23 +73,22 @@ ECPoint ecpoint_mul_1(BigNumber k, ECPoint P, ECParams C)
 	return R;
 }
 //将k二进制表示
-ECPoint ecpoint_mul_2(BigNumber k, ECPoint P, ECParams C)
+ECPoint ecpoint_mul_BIN(BigNumber k, ECPoint P, ECParams C)
 {
 	if (k == 0) return { BigNumber(0), BigNumber(0) };
 	if (k == 1) return P;
 	ECPoint R = {BigNumber(0),BigNumber(0)};
 	ECPoint L = P;
-	BigNumber k2 = k;
-	while (k2 % 2 == 0) {
-		k2 = k2 / 2;
-		L = ecpoint_add(L, L, C);
-	}
-	while (k2 > 0) {
-		if (k2 % 2 == 1) {
+	BigNumber k1 = k;
+	string k1_str = k1.get_value();
+	string k1_str_BIN = HexToBin(k1_str);
+	cout << k1 << "的二进制表示为" << k1_str_BIN << endl;
+	while (k1 > 0) {
+		if (k1 % 2 == 1) {
 			R = ecpoint_add(R, L, C);
 		}
 		L = ecpoint_add(L, L, C);
-		k2 = k2 / 2;
+		k1 = k1 / 2;
 	}
 	return R;
 }
@@ -108,9 +107,35 @@ ECPoint ecpoint_mul_NAF(BigNumber k, ECPoint P, ECParams C)
 	if (k == 0) return { BigNumber(0), BigNumber(0) };
 	if (k == 1) return P;
 	ECPoint R = { BigNumber(0),BigNumber(0) };
-	ECPoint L = P;
-	BigNumber k2 = k;
-
+	ECPoint _P = {P.x,0-P.y}; //-P
+	BigNumber k1 = k;
+	//计算k的NAF值
+	int i = 0;
+	BigNumber NAF_k[1025];
+	while (k1 >= 1) {
+		if (k1 % 2 == 1) {
+			NAF_k[i] = 2 - (k1 % 4);
+			k1 = k1 - NAF_k[i];
+		}
+		else {
+			NAF_k[i] = 0;
+		}
+		k1 = k1 / 2;
+		i++;
+	}
+	cout << k << "的NAF表示为：";
+	int j;
+	for (j = i - 1; j >= 0; j--) {
+		cout << NAF_k[j];
+	}
+	cout << endl;
+	for (j = i - 1; j >= 0; j--) {
+		R = ecpoint_add(R, R, C);
+		if (NAF_k[j] == 1)
+			R = ecpoint_add(R, P, C);
+		if (NAF_k[j] == -1)
+			R = ecpoint_add(R, _P, C);
+	}
 	return R;
 }
 

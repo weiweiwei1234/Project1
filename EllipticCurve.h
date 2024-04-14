@@ -35,7 +35,7 @@ ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params);	//两点加
 
 //点乘算法实现
 ECPoint ecpoint_mul_1(BigNumber k, ECPoint P, ECParams C);		
-ECPoint ecpoint_mul_2(BigNumber k, ECPoint P, ECParams C);
+ECPoint ecpoint_mul_BIN(BigNumber k, ECPoint P, ECParams C);
 ECPoint ecpoint_mul_NAF(BigNumber k, ECPoint P, ECParams C);
 
 //拓展gcd求逆元 a * a^-1 = 1 (mod b)
