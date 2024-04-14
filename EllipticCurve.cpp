@@ -1,40 +1,56 @@
 #include "EllipticCurve.h"
 #include "SM3.h"
-void print_ecparams(ECParams params)
+void printecparams(ECParams params)
 {
-	cout << "椭圆曲线的有限域p：" << params.p << endl;
-	cout << "椭圆曲线的参数a：" << params.a << endl;
-	cout << "椭圆曲线的参数b：" << params.b << endl;
-	cout << "椭圆曲线的阶n:" << params.n << endl;
-	cout << "椭圆曲线的基点X坐标：" << params.Gx << endl;
-	cout << "椭圆曲线的基点Y坐标:" << params.Gy << endl;
+	cout << "椭圆曲线参数：" << endl;
+	cout << "有限域p：\t" << params.p << endl;
+	cout << "系数a：\t\t" << params.a << endl;
+	cout << "系数b：\t\t" << params.b << endl;
+	cout << "阶n：\t\t" << params.n << endl;
+	cout << "基点X坐标：\t" << params.Gx << endl;
+	cout << "基点Y坐标：\t" << params.Gy << endl;
 }
 
-void print_ecpoint(ECPoint point)
+void printecpoint(ECPoint point)
 {
-	cout << "X坐标：" << point.x << endl;
-	cout << "Y坐标：" << point.y << endl;
+	cout << "仿射坐标表示：" << endl;
+	cout << "X坐标：\t" << point.x << endl;
+	cout << "Y坐标：\t" << point.y << endl;
 }
 
-bool is_in_params(ECPoint point, ECParams params)
+void printecpointStandarProjection(ECPointStandardProjection point)
+{
+	cout << "标准射影坐标表示" << endl;
+	cout << "X坐标：\t" << point.x << endl;
+	cout << "Y坐标：\t" << point.y << endl;
+	cout << "Z坐标：\t" << point.z << endl;
+}
+
+bool isinparams(ECPoint point, ECParams params)
 {
 	if ((point.y * point.y) % params.p == (point.x * point.x * point.x + params.a * point.x + params.b) % params.p)
 		return true;
 	return false;
 }
 
-ECPoint_Standard_Projection ECPoint_Standard_Projection_to_ECPoint_Affine(ECPoint P)
+ECPointStandardProjection StandardProjectionToAffine(ECPoint P)
 {
-	return ECPoint_Standard_Projection();
+	ECPointStandardProjection R = { P.x,P.y,1 };
+	return R;
 }
 
-ECPoint ECPoint_Affine_to_ECPoint_Standard_Projection(ECPoint_Standard_Projection P)
+ECPoint AffineToStandardProjection(ECPointStandardProjection P,ECParams C)
 {
-	return ECPoint();
+	ECPoint R;
+	R.x = P.x * modinverse(P.z, C.p);
+	R.y = P.y * modinverse(P.z, C.p);
+	R.x = (R.x % C.p + C.p) % C.p;
+	R.y = (R.y % C.p + C.p) % C.p;
+	return R;
 }
 
 //求 P + Q
-ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params)
+ECPoint ecpointadd(ECPoint P, ECPoint Q, ECParams params)
 {
 	if (P.x == 0 && P.y == 0) return Q;
 	if (Q.x == 0 && Q.y == 0) return P;
@@ -47,41 +63,36 @@ ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params)
 	a = params.a;
 	b = params.b;
 	p = params.p;
-	if (!is_in_params(P, params) || !is_in_params(Q, params))
+	if (!isinparams(P, params) || !isinparams(Q, params))
 		cout << "P、Q必须在椭圆曲线上" << endl;
 	BigNumber k;	//斜率k
 	if (P.x != Q.x) {
-		k = (y2 - y1) * mod_inverse(x2 - x1, p);
+		k = (y2 - y1) * modinverse(x2 - x1, p);
 	}
 	else {
-		k = (3 * x1 * x1 + a) * mod_inverse(2 * y1 , p);
+		k = (3 * x1 * x1 + a) * modinverse(2 * y1 , p);
 	}
 	x3 = k * k - x1 - x2;
 	y3 = k * (x1 - x3) - y1;
-	R.x = x3;
-	R.y = y3;
-	R.x = (x3 % p + p) % p;
-	R.y = (y3 % p + p) % p;
-	if (is_in_params(R, params) == 1)
-		cout << "结果正确!" << endl;
-	else
-		cout << "结果错误!" << endl;
+	x3 = (x3 % p + p) % p;
+	y3 = (y3 % p + p) % p;
+	R = { x3,y3 };
 	return R;
 }
 
 //标准射影坐标的两点加
-ECPoint ecpoint_add_Standard_Projection(ECPoint P, ECPoint Q, ECParams C)
+ECPointStandardProjection ecpointaddStandardProjection(ECPointStandardProjection P, ECPointStandardProjection Q, ECParams C)
 {
-	if (P.x == 0 && P.y == 0) return Q;
-	if (Q.x == 0 && Q.y == 0) return P;
-	ECPoint R;
+	if (P.z == 0) return Q;
+	if (Q.z == 0) return P;
+	ECPointStandardProjection R;
 	BigNumber x1, x2, x3, y1, y2, y3, z1, z2, z3, a, b, p;
 	x1 = P.x;
 	y1 = P.y;
-	z1 = 1;
+	z1 = P.z;
 	x2 = Q.x;
 	y2 = Q.y;
-	z2 = 1;
+	z2 = Q.z;
 	a = C.a;
 	b = C.b;
 	p = C.p;
@@ -116,33 +127,28 @@ ECPoint ecpoint_add_Standard_Projection(ECPoint P, ECPoint Q, ECParams C)
 		y3 = t1 * (4 * t4 - t6) - 2 * t5 * t3;
 		z3 = t2 * t5;
 	}
-	//转换为仿射坐标
-	R.x = x3 * mod_inverse(z3, p) % p;
-	R.y = y3 * mod_inverse(z3, p) % p;
-	R.x = (R.x % p + p) % p;
-	R.y = (R.y % p + p) % p;
-	if (is_in_params(R, C) == 1)
-		cout << "结果正确!" << endl;
-	else
-		cout << "结果错误!" << endl;
+	x3 = (x3 % p + p) % p;
+	y3 = (y3 % p + p) % p;
+	z3 = (z3 % p + p) % p;
+	R = { x3,y3,z3 };
 	return R;
 }
 
 //求 kP
 //朴素乘法 1-k 非常慢
-ECPoint ecpoint_mul_1(BigNumber k, ECPoint P, ECParams C)
+ECPoint ecpointmul1(BigNumber k, ECPoint P, ECParams C)
 {
 	if (k == 0) return { BigNumber(0), BigNumber(0) };
 	if (k == 1) return P;
 	ECPoint R = P;
 	while (k > 1) {
-		R = ecpoint_add(R, P,C);
+		R = ecpointadd(R, P,C);
 		k = k - 1;
 	}
 	return R;
 }
 //将k二进制表示
-ECPoint ecpoint_mul_BIN(BigNumber k, ECPoint P, ECParams C)
+ECPoint ecpointmulBIN(BigNumber k, ECPoint P, ECParams C)
 {
 	if (k == 0) return { BigNumber(0), BigNumber(0) };
 	if (k == 1) return P;
@@ -154,9 +160,9 @@ ECPoint ecpoint_mul_BIN(BigNumber k, ECPoint P, ECParams C)
 	cout << k1 << "的二进制表示为" << k1_str_BIN << endl;
 	while (k1 > 0) {
 		if (k1 % 2 == 1) {
-			R = ecpoint_add(R, L, C);
+			R = ecpointadd(R, L, C);
 		}
-		L = ecpoint_add(L, L, C);
+		L = ecpointadd(L, L, C);
 		k1 = k1 / 2;
 	}
 	return R;
@@ -171,7 +177,7 @@ ECPoint ecpoint_mul_BIN(BigNumber k, ECPoint P, ECParams C)
 //4 若NAF(k)的长度是l, 则2l / 3 < k < 2(l + 1) / 3.
 //5 所有长度为l的NAF中非零数字的平均密度约为1 / 3.
 
-ECPoint ecpoint_mul_NAF(BigNumber k, ECPoint P, ECParams C)
+ECPoint ecpointmulNAF(BigNumber k, ECPoint P, ECParams C)
 {
 	if (k == 0) return { BigNumber(0), BigNumber(0) };
 	if (k == 1) return P;
@@ -199,22 +205,22 @@ ECPoint ecpoint_mul_NAF(BigNumber k, ECPoint P, ECParams C)
 	}
 	cout << endl;
 	for (j = i - 1; j >= 0; j--) {
-		R = ecpoint_add(R, R, C);
+		R = ecpointadd(R, R, C);
 		if (NAF_k[j] == 1)
-			R = ecpoint_add(R, P, C);
+			R = ecpointadd(R, P, C);
 		if (NAF_k[j] == -1)
-			R = ecpoint_add(R, _P, C);
+			R = ecpointadd(R, _P, C);
 	}
 	return R;
 }
 
 //射影坐标
-ECPoint ecpoint_mul_NAF_(BigNumber k, ECPoint P, ECParams C)
+ECPointStandardProjection ecpointmulNAFStandardProjection(BigNumber k, ECPointStandardProjection P, ECParams C)
 {
-	if (k == 0) return { BigNumber(0), BigNumber(0) };
+	if (k == 0) return { BigNumber(0),BigNumber(0),BigNumber(0) };
 	if (k == 1) return P;
-	ECPoint R = { BigNumber(0),BigNumber(0) };
-	ECPoint _P = { P.x,0 - P.y }; //-P
+	ECPointStandardProjection R = { BigNumber(0),BigNumber(0) };
+	ECPointStandardProjection _P = { P.x,0 - P.y ,P.z}; //-P
 	BigNumber k1 = k;
 	//计算k的NAF值
 	int i = 0;
@@ -237,16 +243,16 @@ ECPoint ecpoint_mul_NAF_(BigNumber k, ECPoint P, ECParams C)
 	}
 	cout << endl;
 	for (j = i - 1; j >= 0; j--) {
-		R = ecpoint_add(R, R, C);
+		R = ecpointaddStandardProjection(R, R, C);
 		if (NAF_k[j] == 1)
-			R = ecpoint_add_(R, P, C);
+			R = ecpointaddStandardProjection(R, P, C);
 		if (NAF_k[j] == -1)
-			R = ecpoint_add_(R, _P, C);
+			R = ecpointaddStandardProjection(R, _P, C);
 	}
 	return R;
 }
 
-ECPoint ecpoint_mul_4(BigNumber k, ECPoint P, ECParams C)
+ECPoint ecpointmul4(BigNumber k, ECPoint P, ECParams C)
 {
 	return ECPoint();
 }
@@ -269,7 +275,7 @@ BigNumber exgcd(BigNumber a, BigNumber b, BigNumber& x, BigNumber& y)
 	return gcd;
 }
 
-BigNumber mod_inverse(BigNumber a, BigNumber b)
+BigNumber modinverse(BigNumber a, BigNumber b)
 {
 	BigNumber x, y;
 	BigNumber gcd = exgcd(a, b, x, y);

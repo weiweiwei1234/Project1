@@ -19,14 +19,14 @@ typedef struct ECPoint
 	BigNumber y;	//y
 };
 
-typedef struct ECPoint_Standard_Projection	//标准射影坐标
+typedef struct ECPointStandardProjection	//标准射影坐标
 {
 	BigNumber x;
 	BigNumber y;
 	BigNumber z;
 };
 
-typedef struct ECPoint2	//标准射影坐标
+typedef struct ECPointJacobian	//Jacobian加重射影坐标
 {
 	BigNumber x;
 	BigNumber y;
@@ -42,24 +42,27 @@ typedef struct ECParams {
 	BigNumber Gx;	//基点坐标
 	BigNumber Gy;
 }EllipticCurveParams;
-void print_ecparams(ECParams params);	//打印椭圆曲线的参数
-void print_ecpoint(ECPoint point);		//打印点坐标
-bool is_in_params(ECPoint point, ECParams params);	//判断点是否在椭圆曲线上
-ECPoint_Standard_Projection ECPoint_Standard_Projection_to_ECPoint_Affine(ECPoint P); //仿射坐标转换为标准射影坐标
-ECPoint ECPoint_Affine_to_ECPoint_Standard_Projection(ECPoint_Standard_Projection P); //仿射坐标转换为标准射影坐标
-ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params);	//两点加 仿射坐标
-ECPoint ecpoint_add_Standard_Projection(ECPoint P, ECPoint Q, ECParams C); //两点加 标准射影坐标
 
+void printecparams(ECParams params);	//打印椭圆曲线的参数
+void printecpoint(ECPoint point);		//打印点坐标
+void printecpointStandarProjection(ECPointStandardProjection point); //打印标准射影坐标
+
+bool isinparams(ECPoint point, ECParams params);	//判断点是否在椭圆曲线上
+ECPointStandardProjection StandardProjectionToAffine(ECPoint P); //仿射坐标转换为标准射影坐标
+ECPoint AffineToStandardProjection(ECPointStandardProjection P,ECParams C); //仿射坐标转换为标准射影坐标
+
+ECPoint ecpointadd(ECPoint P, ECPoint Q, ECParams params);	//两点加 仿射坐标
+ECPointStandardProjection ecpointaddStandardProjection(ECPointStandardProjection P, ECPointStandardProjection Q, ECParams C); //两点加 标准射影坐标
 
 //点乘算法实现
-ECPoint ecpoint_mul_1(BigNumber k, ECPoint P, ECParams C);		
-ECPoint ecpoint_mul_BIN(BigNumber k, ECPoint P, ECParams C);
-ECPoint ecpoint_mul_NAF(BigNumber k, ECPoint P, ECParams C);
-ECPoint ecpoint_mul_NAF_(BigNumber k, ECPoint P, ECParams C);
-ECPoint ecpoint_mul_4(BigNumber k, ECPoint P, ECParams C);
+ECPoint ecpointmul1(BigNumber k, ECPoint P, ECParams C);		
+ECPoint ecpointmulBIN(BigNumber k, ECPoint P, ECParams C);
+ECPoint ecpointmulNAF(BigNumber k, ECPoint P, ECParams C);
+ECPointStandardProjection ecpointmulNAFStandardProjection(BigNumber k, ECPointStandardProjection P, ECParams C);
+ECPoint ecpointmul4(BigNumber k, ECPoint P, ECParams C);
 
 //拓展gcd求逆元 a * a^-1 = 1 (mod b)
 BigNumber exgcd(BigNumber a, BigNumber b, BigNumber& x, BigNumber& y);
-BigNumber mod_inverse(BigNumber a,	BigNumber b);  
+BigNumber modinverse(BigNumber a,	BigNumber b);  
 BigNumber random(BigNumber n); //生成一个随机数 ∈[1,n-1]
 
