@@ -55,7 +55,7 @@ int main() {
 		cout << "P5不在椭圆曲线上\n" << endl;
 	}
 
-	ECPoint P6 = ecpoint_add_(P3, P3, C);
+	ECPoint P6 = ecpoint_add_Standard_Projection(P3, P3, C);
 	print_ecpoint(P6);
 	if (is_in_params(P6, C) == 1) {
 		cout << "P6在椭圆曲线上\n" << endl;

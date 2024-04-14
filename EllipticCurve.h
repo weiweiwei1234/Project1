@@ -12,11 +12,25 @@ Gy=BC3736A2 F4F6779C 59BDCEE3 6B692153 D0A9877C C62A4740 02DF32E5 2139F0A0
 */
 #include "BigNumber.h"
 using namespace std;
-//定义椭圆曲线上的点
+//定义椭圆曲线上的点	仿射坐标 Affine 
 typedef struct ECPoint
 {
 	BigNumber x;	//x
 	BigNumber y;	//y
+};
+
+typedef struct ECPoint_Standard_Projection	//标准射影坐标
+{
+	BigNumber x;
+	BigNumber y;
+	BigNumber z;
+};
+
+typedef struct ECPoint2	//标准射影坐标
+{
+	BigNumber x;
+	BigNumber y;
+	BigNumber z;
 };
 
 //定义椭圆曲线参数结构体
@@ -31,8 +45,10 @@ typedef struct ECParams {
 void print_ecparams(ECParams params);	//打印椭圆曲线的参数
 void print_ecpoint(ECPoint point);		//打印点坐标
 bool is_in_params(ECPoint point, ECParams params);	//判断点是否在椭圆曲线上
+ECPoint_Standard_Projection ECPoint_Standard_Projection_to_ECPoint_Affine(ECPoint P); //仿射坐标转换为标准射影坐标
+ECPoint ECPoint_Affine_to_ECPoint_Standard_Projection(ECPoint_Standard_Projection P); //仿射坐标转换为标准射影坐标
 ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params);	//两点加 仿射坐标
-ECPoint ecpoint_add_(ECPoint P, ECPoint Q, ECParams C); //两点加 标准射影坐标
+ECPoint ecpoint_add_Standard_Projection(ECPoint P, ECPoint Q, ECParams C); //两点加 标准射影坐标
 
 
 //点乘算法实现

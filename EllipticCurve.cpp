@@ -23,6 +23,16 @@ bool is_in_params(ECPoint point, ECParams params)
 	return false;
 }
 
+ECPoint_Standard_Projection ECPoint_Standard_Projection_to_ECPoint_Affine(ECPoint P)
+{
+	return ECPoint_Standard_Projection();
+}
+
+ECPoint ECPoint_Affine_to_ECPoint_Standard_Projection(ECPoint_Standard_Projection P)
+{
+	return ECPoint();
+}
+
 //求 P + Q
 ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params)
 {
@@ -60,7 +70,7 @@ ECPoint ecpoint_add(ECPoint P, ECPoint Q, ECParams params)
 }
 
 //标准射影坐标的两点加
-ECPoint ecpoint_add_(ECPoint P, ECPoint Q, ECParams C)
+ECPoint ecpoint_add_Standard_Projection(ECPoint P, ECPoint Q, ECParams C)
 {
 	if (P.x == 0 && P.y == 0) return Q;
 	if (Q.x == 0 && Q.y == 0) return P;
