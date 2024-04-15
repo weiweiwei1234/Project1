@@ -41,11 +41,12 @@ public:
 
     // overloaded arithmetic operators as member functions
     friend const BigNumber operator+(const BigNumber&, const BigNumber&);
-    friend const BigNumber operator+=(const BigNumber&, const BigNumber&);
+    //friend const BigNumber operator+=(const BigNumber&, const BigNumber&);
     friend const BigNumber operator-(const BigNumber&, const BigNumber&);
     friend const BigNumber operator*(const BigNumber&, const BigNumber&);
     friend const BigNumber operator/(const BigNumber&, const BigNumber&);
     friend const BigNumber operator%(const BigNumber&, const BigNumber&);
+    //friend const BigNumber operator^(const BigNumber&, const BigNumber&);
 
     // ouput format for BigNumber
     friend std::ostream& operator<<(std::ostream&, const BigNumber&);

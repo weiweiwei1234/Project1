@@ -43,24 +43,27 @@ typedef struct ECParams {
 	BigNumber Gy;
 }EllipticCurveParams;
 
-void printecparams(ECParams params);	//打印椭圆曲线的参数
+void printecparams(ECParams C);	//打印椭圆曲线的参数
 void printecpoint(ECPoint point);		//打印点坐标
 void printecpointStandarProjection(ECPointStandardProjection point); //打印标准射影坐标
-
-bool isinparams(ECPoint point, ECParams params);	//判断点是否在椭圆曲线上
-ECPointStandardProjection StandardProjectionToAffine(ECPoint P); //仿射坐标转换为标准射影坐标
-ECPoint AffineToStandardProjection(ECPointStandardProjection P,ECParams C); //仿射坐标转换为标准射影坐标
-
-ECPoint ecpointadd(ECPoint P, ECPoint Q, ECParams params);	//两点加 仿射坐标
+void printecpointJacobian(ECPointJacobian point);//打印Jacobian加重射影坐标
+bool isinparams(ECPoint point, ECParams C);	//判断点是否在椭圆曲线上
+bool isinparamsStandardProjection(ECPointStandardProjection point, ECParams C);//判断点是否在标准射影坐标上的椭圆曲线上
+bool isinparamsJacobian(ECPointJacobian point, ECParams C);//判断是否在Jacobian的椭圆曲线上
+ECPointStandardProjection AffineToStandardProjection(ECPoint P); //仿射坐标转换为标准射影坐标
+ECPoint StandardProjectionToAffine(ECPointStandardProjection P,ECParams C); //标准射影坐标转换为仿射坐标 AffineToStandardProjection
+ECPointJacobian AffineTOJacobian(ECPoint P);//仿射坐标转换为雅可比坐标
+ECPoint JacobianToAffine(ECPointJacobian P, ECParams C);//雅可比坐标转换为仿射坐标
+ECPoint ecpointadd(ECPoint P, ECPoint Q, ECParams C);	//两点加 仿射坐标
 ECPointStandardProjection ecpointaddStandardProjection(ECPointStandardProjection P, ECPointStandardProjection Q, ECParams C); //两点加 标准射影坐标
-
+ECPointJacobian ecpointaddJacobian(ECPointJacobian P, ECPointJacobian Q, ECParams C);//两点加 雅可比坐标
 //点乘算法实现
-ECPoint ecpointmul1(BigNumber k, ECPoint P, ECParams C);		
-ECPoint ecpointmulBIN(BigNumber k, ECPoint P, ECParams C);
-ECPoint ecpointmulNAF(BigNumber k, ECPoint P, ECParams C);
-ECPointStandardProjection ecpointmulNAFStandardProjection(BigNumber k, ECPointStandardProjection P, ECParams C);
+ECPoint ecpointmul1(BigNumber k, ECPoint P, ECParams C);	//简单循环	
+ECPoint ecpointmulBIN(BigNumber k, ECPoint P, ECParams C);	//将k二进制表示
+ECPoint ecpointmulNAF(BigNumber k, ECPoint P, ECParams C);	//将k用NAF表示
+ECPointStandardProjection ecpointmulNAFStandardProjection(BigNumber k, ECPointStandardProjection P, ECParams C);	//标准射影坐标下的NAF点乘
+ECPointJacobian ecpointmulNAKJacobian(BigNumber k, ECPointJacobian P, ECParams C);//雅可比坐标下的NAF点乘
 ECPoint ecpointmul4(BigNumber k, ECPoint P, ECParams C);
-
 //拓展gcd求逆元 a * a^-1 = 1 (mod b)
 BigNumber exgcd(BigNumber a, BigNumber b, BigNumber& x, BigNumber& y);
 BigNumber modinverse(BigNumber a,	BigNumber b);  

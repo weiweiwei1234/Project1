@@ -307,6 +307,18 @@ const BigNumber operator%(const BigNumber& lhs, const BigNumber& rhs) {
     return remainder;
 }
 
+//const BigNumber operator^(const BigNumber& lhs, const BigNumber& rhs)
+//{
+//   //rhs>1
+//    BigNumber base = lhs, exponent = rhs;
+//    BigNumber result = base;
+//    if (exponent == 1) return result;
+//    while (exponent > 1) {
+//        result = result * base;
+//    }
+//    return result;
+//}
+
 
 // output format
 std::ostream& operator<<(std::ostream& os, const BigNumber& rhs) {

@@ -13,24 +13,17 @@ int main() {
 	BigNumber o("0000000000000000000000000000000000000000000000000000000000000000");
 	ECPoint G = { Gx,Gy };
 	ECParams C = { p,a,b,n,Gx,Gy };
+	ECPointStandardProjection G_StandardProjection = AffineToStandardProjection(G);
+	ECPointJacobian G_Jacobian = AffineTOJacobian(G);
 	cout << "以下为测试内容:" << endl;
 	printecparams(C);
 	printecpoint(G);
-	if (isinparams(G, C) == 1) {
-		cout << "G在椭圆曲线上\n" << endl;
-	}
-	else {
-		cout << "G不在椭圆曲线上\n" << endl;
-	}
-	ECPoint P2 = ecpointadd(G, G, C);
-	printecpoint(P2);
-	if (isinparams(P2, C) == 1) {
-		cout << "P2在椭圆曲线上\n" << endl;
-	}
-	else {
-		cout << "P2不在椭圆曲线上\n" << endl;
-	}
-	BigNumber k("FFFFFFE");
+	printecpointStandarProjection(G_StandardProjection);
+	printecpointJacobian(G_Jacobian);
+	cout << isinparams(G, C) << endl;
+	cout << isinparamsStandardProjection(G_StandardProjection, C) << endl;
+	cout << isinparamsJacobian(G_Jacobian, C)<< endl;
+	BigNumber k("FFFFF");
 
 	/*cout << "使用朴素点乘:" << endl;
 	ECPoint Pk1 = ecpoint_mul_1(k, G, C);
@@ -52,15 +45,24 @@ int main() {
 	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
 	printecpoint(Pk3);
 
-	cout << "使用NAF乘法(射影坐标）:" << endl;
-	ECPointStandardProjection G_ECPointStandardProjection = StandardProjectionToAffine(G);
+	cout << "使用NAF乘法(标准射影坐标）:" << endl;
+	
 	t1 = GetTickCount64();
-	ECPointStandardProjection Pk4 = ecpointmulNAFStandardProjection(k, G_ECPointStandardProjection, C);
+	ECPointStandardProjection Pk4 = ecpointmulNAFStandardProjection(k, G_StandardProjection, C);
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
-	ECPoint Pk4_ = AffineToStandardProjection(Pk4, C);
+	ECPoint Pk4_ = StandardProjectionToAffine(Pk4, C);
 	printecpoint(Pk4_);
 	printecpointStandarProjection(Pk4);
+
+	cout << "使用NAF乘法(Jacobian加重射影坐标）:" << endl;
+	t1 = GetTickCount64();
+	ECPointJacobian Pk5 = ecpointmulNAKJacobian(k, G_Jacobian, C);
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
+	ECPoint Pk5_ = JacobianToAffine(Pk5, C);
+	printecpoint(Pk5_);
+	printecpointJacobian(Pk5);
 
 	cout << "以上为测试内容。" << endl;
 	return 0;
