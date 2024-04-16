@@ -11,27 +11,29 @@ Gx=32C4AE2C 1F198119 5F990446 6A39C994 8FE30BBF F2660BE1 715A4589 334C74C7
 Gy=BC3736A2 F4F6779C 59BDCEE3 6B692153 D0A9877C C62A4740 02DF32E5 2139F0A0
 */
 #include "BigNumber.h"
+#include <windows.h>
 using namespace std;
+//暂不考虑无穷远点，实际计算基本使用不到
 //定义椭圆曲线上的点	仿射坐标 Affine 
 typedef struct ECPoint
 {
 	BigNumber x;	//x
 	BigNumber y;	//y
-};
+}Point;
 
 typedef struct ECPointStandardProjection	//标准射影坐标
 {
 	BigNumber x;
 	BigNumber y;
 	BigNumber z;
-};
+}PointSP;
 
 typedef struct ECPointJacobian	//Jacobian加重射影坐标
 {
 	BigNumber x;
 	BigNumber y;
 	BigNumber z;
-};
+}PointJ;
 
 //定义椭圆曲线参数结构体
 typedef struct ECParams {
@@ -58,12 +60,21 @@ ECPoint ecpointadd(ECPoint P, ECPoint Q, ECParams C);	//两点加 仿射坐标
 ECPointStandardProjection ecpointaddStandardProjection(ECPointStandardProjection P, ECPointStandardProjection Q, ECParams C); //两点加 标准射影坐标
 ECPointJacobian ecpointaddJacobian(ECPointJacobian P, ECPointJacobian Q, ECParams C);//两点加 雅可比坐标
 //点乘算法实现
-ECPoint ecpointmul1(BigNumber k, ECPoint P, ECParams C);	//简单循环	
+ECPoint ecpointmul1(BigNumber k, ECPoint P, ECParams C);	//简单循环
+//加减链方法
 ECPoint ecpointmulBIN(BigNumber k, ECPoint P, ECParams C);	//将k二进制表示
 ECPoint ecpointmulNAF(BigNumber k, ECPoint P, ECParams C);	//将k用NAF表示
+ECPoint ecpointmulW_NAF(BigNumber k, ECPoint P,int w,ECParams C);
+/*
+w-NAF算法 预见计算
+输入：k, P, 窗口宽度w, 椭圆曲线参数C
+输出：计算结果kP
+*/
 ECPointStandardProjection ecpointmulNAFStandardProjection(BigNumber k, ECPointStandardProjection P, ECParams C);	//标准射影坐标下的NAF点乘
 ECPointJacobian ecpointmulNAKJacobian(BigNumber k, ECPointJacobian P, ECParams C);//雅可比坐标下的NAF点乘
+
 ECPoint ecpointmul4(BigNumber k, ECPoint P, ECParams C);
+
 //拓展gcd求逆元 a * a^-1 = 1 (mod b)
 BigNumber exgcd(BigNumber a, BigNumber b, BigNumber& x, BigNumber& y);
 BigNumber modinverse(BigNumber a,	BigNumber b);  

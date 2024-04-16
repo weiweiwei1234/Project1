@@ -46,6 +46,7 @@ bool isinparams(ECPoint point, ECParams C)
 		return true;
 	return false;
 }
+//Y^2*Z=X^3+aXZ^2+bZ^3
 bool isinparamsStandardProjection(ECPointStandardProjection point, ECParams C)
 {
 	BigNumber x, y, z, a, b, p;
@@ -264,7 +265,7 @@ ECPointJacobian ecpointaddJacobian(ECPointJacobian P, ECPointJacobian Q, ECParam
 }
 
 //求 kP
-//朴素乘法 1-k 非常慢
+//循环 1-k 非常慢
 ECPoint ecpointmul1(BigNumber k, ECPoint P, ECParams C)
 {
 	if (k == 0) return { BigNumber(0), BigNumber(0) };
@@ -283,16 +284,15 @@ ECPoint ecpointmulBIN(BigNumber k, ECPoint P, ECParams C)
 	if (k == 1) return P;
 	ECPoint R = {BigNumber(0),BigNumber(0)};
 	ECPoint L = P;
-	BigNumber k1 = k;
-	string k1_str = k1.get_value();
-	string k1_str_BIN = HexToBin(k1_str);
-	cout << k1 << "的二进制表示为" << k1_str_BIN << endl;
-	while (k1 > 0) {
-		if (k1 % 2 == 1) {
+	//string k_str = k.get_value();
+	//string k_str_BIN = HexToBin(k_str);
+	//cout << k << "的二进制表示为" << k_str_BIN << endl;
+	while (k > 0) {
+		if (k % 2 == 1) {
 			R = ecpointadd(R, L, C);
 		}
 		L = ecpointadd(L, L, C);
-		k1 = k1 / 2;
+		k = k / 2;
 	}
 	return R;
 }
@@ -311,11 +311,10 @@ ECPoint ecpointmulNAF(BigNumber k, ECPoint P, ECParams C)
 	if (k == 0) return { BigNumber(0), BigNumber(0) };
 	if (k == 1) return P;
 	ECPoint R = { BigNumber(0),BigNumber(0) };
-	ECPoint _P = {P.x,0-P.y}; //-P
 	BigNumber k1 = k;
 	//计算k的NAF值
 	int i = 0;
-	int NAF_k[1025];
+	int NAF_k[1025] = { 0 };
 	BigNumber temp;
 	while (k1 >= 1) {
 		if (k1 % 2 == 1) {
@@ -329,19 +328,68 @@ ECPoint ecpointmulNAF(BigNumber k, ECPoint P, ECParams C)
 		k1 = k1 / 2;
 		i++;
 	}
-	cout << k << "\n的NAF表示为：\n";
-	int j;
-	for (j = i - 1; j >= 0; j--) {
-		cout << NAF_k[j];
-	}
-	cout << endl;
-	for (j = i - 1; j >= 0; j--) {
+	for (int j = i - 1; j >= 0; j--) {
 		R = ecpointadd(R, R, C);
 		if (NAF_k[j] == 1)
 			R = ecpointadd(R, P, C);
 		if (NAF_k[j] == -1)
-			R = ecpointadd(R, _P, C);
+			R = ecpointadd(R, { P.x,0 - P.y }, C);
 	}
+	return R;
+}
+
+ECPoint ecpointmulW_NAF(BigNumber k, ECPoint P, int w, ECParams C)
+{
+	if (k == 0) return { BigNumber(0),BigNumber(0) };
+	if (k == 1) return P;
+	ECPoint R{ BigNumber(0), BigNumber(0) };
+	BigNumber k1 = k;
+	//用w计算预计算表 计算iP i=1,3,5,...,2^(w-1)-1
+	ECPoint Pi[64];
+	for (int j = 1; j < (int)pow(2, w); j = j + 2) {
+		Pi[j] = ecpointmulNAF(BigNumber(j), P, C);
+	}
+	//输出预计算表
+	for (int i = 1; i < (int)pow(2, w - 1); i = i + 2) {
+		cout << "2^" << i << ":(" << Pi[i].x << "," << Pi[i].y << ")" << endl;
+	}
+	//计算NAFw(k)
+	int i = 0;
+	int NAFW[1025] = { 0 };
+	BigNumber w2((int)pow(2, w));
+	while (k1 >= 1) {
+		if (k1 % 2 == 1) {
+			NAFW[i] = BigNumber(k1 % w2).to_int();
+			while (NAFW[i] > pow(2, w - 1)) {
+				NAFW[i] = NAFW[i] - pow(2, w);
+			}
+			k1 = k1 - BigNumber(NAFW[i]);
+		}
+		else {
+			NAFW[i] = 0;
+		}
+		k1 = k1 / 2;
+		i++;
+	}
+	//输出NAFW(k)
+	cout << "NAF(" << k << "):" << endl;
+	for (int j = i - 1; j >= 0; j--) {
+		cout << NAFW[j] << " ";
+	}
+	cout << endl;
+	long t1, t2;//计算运行时间，t1:开始时间,t2:结束时间
+	t1 = GetTickCount64();
+	for (int j = i - 1; j >= 0; j--) {
+		R = ecpointadd(R, R, C);
+		if (NAFW[j] > 0) {
+			R = ecpointadd(R, Pi[NAFW[j]], C);
+		}
+		if (NAFW[j] < 0) {
+			R = ecpointadd(R, {Pi[-NAFW[j]].x,0-Pi[-NAFW[j]].y}, C);
+		}
+	}
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
 	return R;
 }
 
@@ -355,7 +403,7 @@ ECPointStandardProjection ecpointmulNAFStandardProjection(BigNumber k, ECPointSt
 	BigNumber k1 = k;
 	//计算k的NAF值
 	int i = 0;
-	int NAF_k[1025];
+	int NAF_k[1025] = { 0 };
 	BigNumber temp;
 	while (k1 >= 1) {
 		if (k1 % 2 == 1) {
@@ -369,13 +417,7 @@ ECPointStandardProjection ecpointmulNAFStandardProjection(BigNumber k, ECPointSt
 		k1 = k1 / 2;
 		i++;
 	}
-	cout << k << "\n的NAF表示为：\n";
-	int j;
-	for (j = i - 1; j >= 0; j--) {
-		cout << NAF_k[j];
-	}
-	cout << endl;
-	for (j = i - 1; j >= 0; j--) {
+	for (int j = i - 1; j >= 0; j--) {
 		R = ecpointaddStandardProjection(R, R, C);
 		if (NAF_k[j] == 1)
 			R = ecpointaddStandardProjection(R, P, C);
@@ -394,7 +436,7 @@ ECPointJacobian ecpointmulNAKJacobian(BigNumber k, ECPointJacobian P, ECParams C
 	BigNumber k1 = k;
 	//计算k的NAF值
 	int i = 0;
-	int NAF_k[1025];
+	int NAF_k[1025] = { 0 };
 	BigNumber temp;
 	while (k1 >= 1) {
 		if (k1 % 2 == 1) {
@@ -408,13 +450,7 @@ ECPointJacobian ecpointmulNAKJacobian(BigNumber k, ECPointJacobian P, ECParams C
 		k1 = k1 / 2;
 		i++;
 	}
-	cout << k << "\n的NAF表示为：\n";
-	int j;
-	for (j = i - 1; j >= 0; j--) {
-		cout << NAF_k[j];
-	}
-	cout << endl;
-	for (j = i - 1; j >= 0; j--) {
+	for (int j = i - 1; j >= 0; j--) {
 		R = ecpointaddJacobian(R, R, C);
 		if (NAF_k[j] == 1)
 			R = ecpointaddJacobian(R, P, C);

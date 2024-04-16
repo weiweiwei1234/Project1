@@ -4,7 +4,7 @@
 #include <windows.h>
 //椭圆曲线方程：y2 = x3 + ax + b。
 int main() {
-	BigNumber p("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF");
+	BigNumber p("115792089237316195423570985008687907853269984665640564039457584007913129639932");
 	BigNumber a("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC");
 	BigNumber b("28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93");
 	BigNumber n("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123");
@@ -20,33 +20,36 @@ int main() {
 	printecpoint(G);
 	printecpointStandarProjection(G_StandardProjection);
 	printecpointJacobian(G_Jacobian);
-	cout << isinparams(G, C) << endl;
-	cout << isinparamsStandardProjection(G_StandardProjection, C) << endl;
-	cout << isinparamsJacobian(G_Jacobian, C)<< endl;
-	BigNumber k("FFFFF");
-
+	//cout << isinparams(G, C) << endl;
+	//cout << isinparamsStandardProjection(G_StandardProjection, C) << endl;
+	//cout << isinparamsJacobian(G_Jacobian, C)<< endl;
+	BigNumber k("28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93");
+	//cout << HexToBin(k.get_value());
 	/*cout << "使用朴素点乘:" << endl;
 	ECPoint Pk1 = ecpoint_mul_1(k, G, C);
 	print_ecpoint(Pk1);*/
 
 	long t1,t2;//计算运行时间，t1:开始时间,t2:结束时间
 
-	cout << "将k二进制表示:" << endl;
+	cout << "\n加减链方法（二进制）表示：" << endl;
 	t1 = GetTickCount64();
 	ECPoint Pk2 = ecpointmulBIN(k, G, C);
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
 	printecpoint(Pk2);
 
-	cout << "使用NAF乘法(仿射坐标）:" << endl;
+	cout << "\n使用NAF方法（仿射坐标）：" << endl;
 	t1 = GetTickCount64();
 	ECPoint Pk3 = ecpointmulNAF(k, G, C);
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
 	printecpoint(Pk3);
 
-	cout << "使用NAF乘法(标准射影坐标）:" << endl;
-	
+	cout << "\n使用w-NAF方法（仿射坐标）:" << endl;
+	ECPoint Pk3_ = ecpointmulW_NAF(k, G, 4, C);
+	printecpoint(Pk3_);
+
+	cout << "\n使用NAF方法（标准射影坐标）：" << endl;
 	t1 = GetTickCount64();
 	ECPointStandardProjection Pk4 = ecpointmulNAFStandardProjection(k, G_StandardProjection, C);
 	t2 = GetTickCount64();
@@ -55,7 +58,7 @@ int main() {
 	printecpoint(Pk4_);
 	printecpointStandarProjection(Pk4);
 
-	cout << "使用NAF乘法(Jacobian加重射影坐标）:" << endl;
+	cout << "\n使用NAF方法（Jacobian加重射影坐标）：" << endl;
 	t1 = GetTickCount64();
 	ECPointJacobian Pk5 = ecpointmulNAKJacobian(k, G_Jacobian, C);
 	t2 = GetTickCount64();
