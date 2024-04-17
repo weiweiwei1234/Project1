@@ -1,7 +1,12 @@
 #include "SM3.h"
 #include "EllipticCurve.h"
 #include "BIGNUM.h"
+#include "test1.h"
 #include <windows.h>
+#include <random>
+#include <sstream>
+#include <iomanip>
+#include <limits>
 //椭圆曲线方程：y2 = x3 + ax + b。
 int main() {
 	BIGNUM p("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF");
@@ -13,41 +18,8 @@ int main() {
 	EccPoint G = { Gx,Gy };
 	EccParams C = { p,a,b,n,Gx,Gy };
 	EccPointJacobian G_Jacobian = AffineTOJacobian(G);
-	cout << "以下为测试内容:" << endl;
-	printEccParams(C);
-	printEccPoint(G);
-	printEccPointJacobian(G_Jacobian);
-	BIGNUM k("ABCDEF");
+	long t1, t2;//计算运行时间，t1:开始时间,t2:结束时间
 
-	long t1,t2;//计算运行时间，t1:开始时间,t2:结束时间
-
-	cout << "\n二进制表示：" << endl;
-	t1 = GetTickCount64();
-	EccPoint Pk2 = EccPointmulBIN(k, G, C);
-	t2 = GetTickCount64();
-	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
-	printEccPoint(Pk2);
-
-	cout << "\n使用NAF方法（仿射坐标）：" << endl;
-	t1 = GetTickCount64();
-	EccPoint Pk3 = EccPointmulNAF(k, G, C);
-	t2 = GetTickCount64();
-	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
-	printEccPoint(Pk3);
-
-	cout << "\n使用w-NAF方法（仿射坐标）:" << endl;
-	EccPoint Pk3_ = EccPointmulW_NAF(k, G, 4, C);
-	printEccPoint(Pk3_);
-
-	cout << "\n使用NAF方法（Jacobian加重射影坐标）：" << endl;
-	t1 = GetTickCount64();
-	EccPointJacobian Pk5 = EccPointmulNAKJacobian(k, G_Jacobian, C);
-	t2 = GetTickCount64();
-	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
-	EccPoint Pk5_ = JacobianToAffine(Pk5, C);
-	printEccPoint(Pk5_);
-	printEccPointJacobian(Pk5);
-
-	cout << "以上为测试内容。" << endl;
+	test1();
 	return 0;
 }

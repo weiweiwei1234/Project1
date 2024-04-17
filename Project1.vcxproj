@@ -133,10 +133,12 @@
     <ClCompile Include="EllipticCurve.cpp" />
     <ClCompile Include="EllipticCurve.h" />
     <ClCompile Include="SM3.cpp" />
+    <ClCompile Include="test1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BIGNUM.h" />
     <ClInclude Include="SM3.h" />
+    <ClInclude Include="test1.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="说明文档.txt" />

@@ -86,8 +86,8 @@ EccPointStandardProjection AffineToStandardProjection(EccPoint P)
 EccPoint StandardProjectionToAffine(EccPointStandardProjection P,EccParams C)
 {
 	EccPoint R;
-	R.x = P.x * modinverse(P.z, C.p);
-	R.y = P.y * modinverse(P.z, C.p);
+	R.x = P.x * Mod_inverse(P.z, C.p);
+	R.y = P.y * Mod_inverse(P.z, C.p);
 	R.x = (R.x % C.p + C.p) % C.p;
 	R.y = (R.y % C.p + C.p) % C.p;
 	return R;
@@ -102,15 +102,15 @@ EccPointJacobian AffineTOJacobian(EccPoint P)
 EccPoint JacobianToAffine(EccPointJacobian P, EccParams C)
 {
 	EccPoint R;
-	R.x = P.x * modinverse(P.z * P.z, C.p);
-	R.y = P.y * modinverse(P.z * P.z * P.z, C.p);
+	R.x = P.x * Mod_inverse(P.z * P.z, C.p);
+	R.y = P.y * Mod_inverse(P.z * P.z * P.z, C.p);
 	R.x = (R.x % C.p + C.p) % C.p;
 	R.y = (R.y % C.p + C.p) % C.p;
 	return R;
 }
 
 //求 P + Q
-EccPoint EccPointadd(EccPoint P, EccPoint Q, EccParams C)
+EccPoint EccPointAdd(EccPoint P, EccPoint Q, EccParams C)
 {
 	if (P.x == 0 && P.y == 0) return Q;
 	if (Q.x == 0 && Q.y == 0) return P;
@@ -127,10 +127,10 @@ EccPoint EccPointadd(EccPoint P, EccPoint Q, EccParams C)
 		cout << "P、Q必须在椭圆曲线上" << endl;
 	BIGNUM k;	//斜率k
 	if (P.x != Q.x) {
-		k = (y2 - y1) * modinverse(x2 - x1, p);
+		k = (y2 - y1) * Mod_inverse(x2 - x1, p);
 	}
 	else {
-		k = (3 * x1 * x1 + a) * modinverse(2 * y1 , p);
+		k = (3 * x1 * x1 + a) * Mod_inverse(2 * y1 , p);
 	}
 	x3 = k * k - x1 - x2;
 	y3 = k * (x1 - x3) - y1;
@@ -141,7 +141,7 @@ EccPoint EccPointadd(EccPoint P, EccPoint Q, EccParams C)
 }
 
 //标准射影坐标的两点加 一般不使用
-EccPointStandardProjection EccPointaddStandardProjection(EccPointStandardProjection P, EccPointStandardProjection Q, EccParams C)
+EccPointStandardProjection EccPointAddStandardProjection(EccPointStandardProjection P, EccPointStandardProjection Q, EccParams C)
 {
 	if (P.z == 0) return Q;
 	if (Q.z == 0) return P;
@@ -196,7 +196,7 @@ EccPointStandardProjection EccPointaddStandardProjection(EccPointStandardProject
 	return R;
 }
 //两点加 雅可比坐标
-EccPointJacobian EccPointaddJacobian(EccPointJacobian P, EccPointJacobian Q, EccParams C)
+EccPointJacobian EccPointAddJacobian(EccPointJacobian P, EccPointJacobian Q, EccParams C)
 {
 	if (P.z == 0) return Q;
 	if (Q.z == 0) return P;
@@ -226,7 +226,7 @@ EccPointJacobian EccPointaddJacobian(EccPointJacobian P, EccPointJacobian Q, Ecc
 		//得到R的雅可比坐标
 		x3 = t6 * t6 - t7 * t3 * t3;
 		t9 = t7 * t3 * t3 - 2 * x3;
-		y3 = (t9 * t6 - t8 * t3 * t3 * t3) * modinverse(2, p);
+		y3 = (t9 * t6 - t8 * t3 * t3 * t3) * Mod_inverse(2, p);
 		z3 = z1 * z2 * t3;
 	}
 	else {
@@ -248,19 +248,19 @@ EccPointJacobian EccPointaddJacobian(EccPointJacobian P, EccPointJacobian Q, Ecc
 
 //求 kP
 //循环 1-k 非常慢
-EccPoint EccPointmul1(BIGNUM k, EccPoint P, EccParams C)
+EccPoint EccPointMul1(BIGNUM k, EccPoint P, EccParams C)
 {
 	if (k == 0) return { BIGNUM(0), BIGNUM(0) };
 	if (k == 1) return P;
 	EccPoint R = P;
 	while (k > 1) {
-		R = EccPointadd(R, P,C);
+		R = EccPointAdd(R, P,C);
 		k = k - 1;
 	}
 	return R;
 }
 //将k二进制表示
-EccPoint EccPointmulBIN(BIGNUM k, EccPoint P, EccParams C)
+EccPoint EccPointMulBIN(BIGNUM k, EccPoint P, EccParams C)
 {
 	if (k == 0) return { BIGNUM(0), BIGNUM(0) };
 	if (k == 1) return P;
@@ -271,14 +271,14 @@ EccPoint EccPointmulBIN(BIGNUM k, EccPoint P, EccParams C)
 	//cout << k << "的二进制表示为" << k_str_BIN << endl;
 	while (k > 0) {
 		if (k % 2 == 1) {
-			R = EccPointadd(R, L, C);
+			R = EccPointAdd(R, L, C);
 		}
-		L = EccPointadd(L, L, C);
+		L = EccPointAdd(L, L, C);
 		k = k / 2;
 	}
 	return R;
 }
-//使用NAF算法(比二进制表示好点)
+//使用NAF算法
 //标量的非相邻表示称为NAF
 //定义：一个正整数k的非相邻表示型是表达式, 其中, 并且没有两个连续的数字ki是非零的, NAF的长度是l.
 //NAF的性质：
@@ -288,7 +288,7 @@ EccPoint EccPointmulBIN(BIGNUM k, EccPoint P, EccParams C)
 //4 若NAF(k)的长度是l, 则2l / 3 < k < 2(l + 1) / 3.
 //5 所有长度为l的NAF中非零数字的平均密度约为1 / 3.
 
-EccPoint EccPointmulNAF(BIGNUM k, EccPoint P, EccParams C)
+EccPoint EccPointMulNAF(BIGNUM k, EccPoint P, EccParams C)
 {
 	if (k == 0) return { BIGNUM(0), BIGNUM(0) };
 	if (k == 1) return P;
@@ -311,16 +311,16 @@ EccPoint EccPointmulNAF(BIGNUM k, EccPoint P, EccParams C)
 		i++;
 	}
 	for (int j = i - 1; j >= 0; j--) {
-		R = EccPointadd(R, R, C);
+		R = EccPointAdd(R, R, C);
 		if (NAF_k[j] == 1)
-			R = EccPointadd(R, P, C);
+			R = EccPointAdd(R, P, C);
 		if (NAF_k[j] == -1)
-			R = EccPointadd(R, { P.x,0 - P.y }, C);
+			R = EccPointAdd(R, { P.x,0 - P.y }, C);
 	}
 	return R;
 }
 
-EccPoint EccPointmulW_NAF(BIGNUM k, EccPoint P, int w, EccParams C)
+EccPoint EccPointMulW_NAF(BIGNUM k, EccPoint P, int w, EccParams C)
 {
 	if (k == 0) return { BIGNUM(0),BIGNUM(0) };
 	if (k == 1) return P;
@@ -328,17 +328,12 @@ EccPoint EccPointmulW_NAF(BIGNUM k, EccPoint P, int w, EccParams C)
 	BIGNUM k1 = k;
 	//用w计算预计算表 计算iP i=1,3,5,...,2^(w-1)-1
 	EccPoint Pi[64];
-	EccPoint P_2 = EccPointadd(P, P, C);
+	EccPoint P_2 = EccPointAdd(P, P, C);
 	for (int j = 1; j < (int)pow(2, w); j = j + 2) {
 		if (j == 1) Pi[j] = P;
 		else
-			Pi[j] = EccPointadd(Pi[j - 2], P_2, C);
+			Pi[j] = EccPointAdd(Pi[j - 2], P_2, C);
 	}
-	//输出预计算表
-	for (int i = 1; i < (int)pow(2, w - 1); i = i + 2) {
-		cout << "2^" << i << ":(" << Pi[i].x << "," << Pi[i].y << ")" << endl;
-	}
-	//计算NAFw(k)
 	int i = 0;
 	int NAFW[1025] = { 0 };
 	BIGNUM w2((int)pow(2, w));
@@ -356,21 +351,15 @@ EccPoint EccPointmulW_NAF(BIGNUM k, EccPoint P, int w, EccParams C)
 		k1 = k1 / 2;
 		i++;
 	}
-	//输出NAFW(k)
-	cout << "NAF(" << k << "):" << endl;
-	for (int j = i - 1; j >= 0; j--) {
-		cout << NAFW[j] << " ";
-	}
-	cout << endl;
 	long t1, t2;//计算运行时间，t1:开始时间,t2:结束时间
 	t1 = GetTickCount64();
 	for (int j = i - 1; j >= 0; j--) {
-		R = EccPointadd(R, R, C);
+		R = EccPointAdd(R, R, C);
 		if (NAFW[j] > 0) {
-			R = EccPointadd(R, Pi[NAFW[j]], C);
+			R = EccPointAdd(R, Pi[NAFW[j]], C);
 		}
 		if (NAFW[j] < 0) {
-			R = EccPointadd(R, {Pi[-NAFW[j]].x,0-Pi[-NAFW[j]].y}, C);
+			R = EccPointAdd(R, {Pi[-NAFW[j]].x,0-Pi[-NAFW[j]].y}, C);
 		}
 	}
 	t2 = GetTickCount64();
@@ -379,7 +368,7 @@ EccPoint EccPointmulW_NAF(BIGNUM k, EccPoint P, int w, EccParams C)
 }
 
 //射影坐标 不使用
-EccPointStandardProjection EccPointmulNAFStandardProjection(BIGNUM k, EccPointStandardProjection P, EccParams C)
+EccPointStandardProjection EccPointMulNAFStandardProjection(BIGNUM k, EccPointStandardProjection P, EccParams C)
 {
 	if (k == 0) return { BIGNUM(0),BIGNUM(1),BIGNUM(0) };
 	if (k == 1) return P;
@@ -403,16 +392,16 @@ EccPointStandardProjection EccPointmulNAFStandardProjection(BIGNUM k, EccPointSt
 		i++;
 	}
 	for (int j = i - 1; j >= 0; j--) {
-		R = EccPointaddStandardProjection(R, R, C);
+		R = EccPointAddStandardProjection(R, R, C);
 		if (NAF_k[j] == 1)
-			R = EccPointaddStandardProjection(R, P, C);
+			R = EccPointAddStandardProjection(R, P, C);
 		if (NAF_k[j] == -1)
-			R = EccPointaddStandardProjection(R, _P, C);
+			R = EccPointAddStandardProjection(R, _P, C);
 	}
 	return R;
 }
 
-EccPointJacobian EccPointmulNAKJacobian(BIGNUM k, EccPointJacobian P, EccParams C)
+EccPointJacobian EccPointMul_NAF_Jacobian(BIGNUM k, EccPointJacobian P, EccParams C)
 {
 	if (k == 0) return { BIGNUM(1),BIGNUM(1),BIGNUM(0) };
 	if (k == 1) return P;
@@ -436,23 +425,70 @@ EccPointJacobian EccPointmulNAKJacobian(BIGNUM k, EccPointJacobian P, EccParams 
 		i++;
 	}
 	for (int j = i - 1; j >= 0; j--) {
-		R = EccPointaddJacobian(R, R, C);
+		R = EccPointAddJacobian(R, R, C);
 		if (NAF_k[j] == 1)
-			R = EccPointaddJacobian(R, P, C);
+			R = EccPointAddJacobian(R, P, C);
 		if (NAF_k[j] == -1)
-			R = EccPointaddJacobian(R, _P, C);
+			R = EccPointAddJacobian(R, _P, C);
 	}
 	return R;
 }
 
-EccPoint EccPointmul4(BIGNUM k, EccPoint P, EccParams C)
+EccPointJacobian EccPointMul_W_NAF_Jacobian(BIGNUM k, EccPointJacobian P, int w, EccParams C)
+{
+	if (k == 0) return { BIGNUM(1),BIGNUM(1),BIGNUM(0)};
+	if (k == 1) return P;
+	EccPointJacobian R{ BIGNUM(1), BIGNUM(1),BIGNUM(0) };
+	BIGNUM k1 = k;
+	//用w计算预计算表 计算iP i=1,3,5,...,2^(w-1)-1
+	EccPointJacobian Pi[64];
+	EccPointJacobian P_2 = EccPointAddJacobian(P, P, C);
+	for (int j = 1; j < (int)pow(2, w); j = j + 2) {
+		if (j == 1) Pi[j] = P;
+		else
+			Pi[j] = EccPointAddJacobian(Pi[j - 2], P_2, C);
+	}
+	int i = 0;
+	int NAFW[1025] = { 0 };
+	BIGNUM w2((int)pow(2, w));
+	while (k1 >= 1) {
+		if (k1 % 2 == 1) {
+			NAFW[i] = BIGNUM(k1 % w2).to_int();
+			while (NAFW[i] > pow(2, w - 1)) {
+				NAFW[i] = NAFW[i] - pow(2, w);
+			}
+			k1 = k1 - BIGNUM(NAFW[i]);
+		}
+		else {
+			NAFW[i] = 0;
+		}
+		k1 = k1 / 2;
+		i++;
+	}
+	long t1, t2;//计算运行时间，t1:开始时间,t2:结束时间
+	t1 = GetTickCount64();
+	for (int j = i - 1; j >= 0; j--) {
+		R = EccPointAddJacobian(R, R, C);
+		if (NAFW[j] > 0) {
+			R = EccPointAddJacobian(R, Pi[NAFW[j]], C);
+		}
+		if (NAFW[j] < 0) {
+			R = EccPointAddJacobian(R, { Pi[-NAFW[j]].x,0 - Pi[-NAFW[j]].y, Pi[-NAFW[j]].z}, C);
+		}
+	}
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
+	return R;
+}
+
+EccPoint EccPointMul4(BIGNUM k, EccPoint P, EccParams C)
 {
 	return EccPoint();
 }
 
 //求最大公约数的同时求 ax + by = gcd(a,b) 的解
 //exgcd结束时，x、y就是所求解
-BIGNUM exgcd(BIGNUM a, BIGNUM b, BIGNUM& x, BIGNUM& y)
+BIGNUM exgcd(BIGNUM a, BIGNUM b, BIGNUM &x, BIGNUM &y)
 {
 	//递归边界
 	if (b == 0) {
@@ -460,27 +496,53 @@ BIGNUM exgcd(BIGNUM a, BIGNUM b, BIGNUM& x, BIGNUM& y)
 		return a;
 	}
 	//递归计算最大公约数gcd
-	BIGNUM gcd = exgcd(b, a % b, x, y);
+	BIGNUM d = exgcd(b, a % b, y, x);//a,b交换位置，x,y也交换位置
 	//递推公式，求解
-	BIGNUM temp = x;
-	x = y;
-	y = temp - a / b * y;
-	return gcd;
+	y = y - a / b * x;
+	return d;
 }
 
-BIGNUM modinverse(BIGNUM a, BIGNUM b)
+BIGNUM Mod_inverse(BIGNUM a, BIGNUM b)
 {
 	BIGNUM x, y;
-	BIGNUM gcd = exgcd(a, b, x, y);
-	//cout << gcd << endl;
-	//if (gcd != 1) {
-	//	// 如果最大公约数不是 1，则没有逆元
-	//	std::cerr << "逆元不存在，因为最大公约数不是1。" << std::endl;
-	//	return -1;
-	//}
-	//x= (x % b + b) % b;	//最小整数解，也就是a模b的逆元
-	//cout << a * x % b << endl;
-	return x * gcd;	//若a、b不是互质的则返回x*gcd以确保计算正确
+	BIGNUM gcd = exgcd(a, b, x, y); //最大公因子可能为1或者-1
+	if (gcd == -1) return 0 - x;
+	return x;
+}
+// 输入：a,b,N
+// 输出：y=ab (mod N)
+// 1.计算
+//		R=2^len(N);
+//		a'=aR(mod N),b'=bR(mod N),X=a'b'
+// 2.调用蒙哥马利约简算法
+//		X1=MD(X,R,N) = X/R=abR(mod N)
+// 3.再调用蒙哥马利约简算法
+//		y=MD(X1,R,N) = X1/R=ab(mod N)
+BIGNUM Montgomery_Multiply(BIGNUM a , BIGNUM b, BIGNUM N)
+{
+	BIGNUM R;
+	BIGNUM a_ = a * R % N;
+	BIGNUM b_ = b * R % N;
+	BIGNUM X = a_ * b_;
+	BIGNUM X1 = Montgomery_Reduction(X, R, N);
+	BIGNUM y = Montgomery_Reduction(X1, R, N);
+	return y;
+}
+// 已知 a,b,N
+// 输入：X，R，N
+// 输出 y
+// 1.计算
+//		N'=-N^-1 (mod R)
+//		m=XN'(mod R);
+//	2.计算 y=(X+mN)/R: X+mN >> k;
+//  3.若y>N,则y=y-N; 
+BIGNUM Montgomery_Reduction(BIGNUM X, BIGNUM R, BIGNUM N)
+{
+	BIGNUM N_;
+	BIGNUM m = X * N_ % R;
+	BIGNUM y = (X + m * N) / R;//R=2^k y = X + mN >> k
+	if (y > N) y = y - N;
+	return y;
 }
 
 BIGNUM random(BIGNUM n)

@@ -15,11 +15,10 @@ Gy=BC3736A2 F4F6779C 59BDCEE3 6B692153 D0A9877C C62A4740 02DF32E5 2139F0A0
 using namespace std;
 //暂不考虑无穷远点，实际计算基本使用不到
 //定义椭圆曲线上的点	仿射坐标 Affine
-class EccPoint
-{
+class EccPoint{
 public:
-	BIGNUM x;	//x
-	BIGNUM y;	//y
+	//bool inf;	//无穷远点
+	BIGNUM x, y;
 };
 
 class EccPointStandardProjection	//标准射影坐标
@@ -39,47 +38,61 @@ public:
 };
 
 //定义椭圆曲线参数结构体
-typedef struct EccParams {
+class  EccParams {
+public:
 	BIGNUM p;	//有限域的模数
 	BIGNUM a;	//椭圆曲线参数a
 	BIGNUM b;	//椭圆曲线参数b
 	BIGNUM n;	//群的阶
 	BIGNUM Gx;	//基点坐标
 	BIGNUM Gy;
-}EllipticCurveParams;
+};
 
-void printEccParams(EccParams C);	//打印椭圆曲线的参数
-void printEccPoint(EccPoint point);		//打印点坐标
-void printEccPointStandarProjection(EccPointStandardProjection point); //打印标准射影坐标
-void printEccPointJacobian(EccPointJacobian point);//打印Jacobian加重射影坐标
-bool isinEccParams(EccPoint point, EccParams C);	//判断点是否在椭圆曲线上
-bool isinEccParamsStandardProjection(EccPointStandardProjection point, EccParams C);//判断点是否在标准射影坐标上的椭圆曲线上
-bool isinEccParamsJacobian(EccPointJacobian point, EccParams C);//判断是否在Jacobian的椭圆曲线上
-EccPointStandardProjection AffineToStandardProjection(EccPoint P); //仿射坐标转换为标准射影坐标
-EccPoint StandardProjectionToAffine(EccPointStandardProjection P,EccParams C); //标准射影坐标转换为仿射坐标 AffineToStandardProjection
-EccPointJacobian AffineTOJacobian(EccPoint P);//仿射坐标转换为雅可比坐标
-EccPoint JacobianToAffine(EccPointJacobian P, EccParams C);//雅可比坐标转换为仿射坐标
-EccPoint EccPointadd(EccPoint P, EccPoint Q, EccParams C);	//两点加 仿射坐标
-EccPointStandardProjection EccPointaddStandardProjection(EccPointStandardProjection P, EccPointStandardProjection Q, EccParams C); //两点加 标准射影坐标
-EccPointJacobian EccPointaddJacobian(EccPointJacobian P, EccPointJacobian Q, EccParams C);//两点加 雅可比坐标
+void printEccParams(EccParams);	//打印椭圆曲线的参数
+void printEccPoint(EccPoint);		//打印点坐标
+void printEccPointStandarProjection(EccPointStandardProjection); //打印标准射影坐标
+void printEccPointJacobian(EccPointJacobian);//打印Jacobian加重射影坐标
+
+bool isinEccParams(EccPoint, EccParams);	//判断点是否在椭圆曲线上
+bool isinEccParamsStandardProjection(EccPointStandardProjection, EccParams);//判断点是否在标准射影坐标上的椭圆曲线上
+bool isinEccParamsJacobian(EccPointJacobian, EccParams);//判断是否在Jacobian
+
+EccPointStandardProjection AffineToStandardProjection(EccPoint); //仿射坐标转换为标准射影坐标
+EccPoint StandardProjectionToAffine(EccPointStandardProjection,EccParams); //标准射影坐标转换为仿射坐标 AffineToStandardProjection
+EccPointJacobian AffineTOJacobian(EccPoint);//仿射坐标转换为雅可比坐标
+EccPoint JacobianToAffine(EccPointJacobian, EccParams);//雅可比坐标转换为仿射坐标
+
+EccPoint EccPointAdd(EccPoint, EccPoint, EccParams);	//两点加 仿射坐标
+EccPointStandardProjection EccPointAddStandardProjection(EccPointStandardProjection, EccPointStandardProjection, EccParams); //两点加 标准射影坐标
+EccPointJacobian EccPointAddJacobian(EccPointJacobian, EccPointJacobian, EccParams);//两点加 
+
 //点乘算法实现
-EccPoint EccPointmul1(BIGNUM k, EccPoint P, EccParams C);	//简单循环
+EccPoint EccPointMul1(BIGNUM, EccPoint, EccParams);	//简单循环
 //加减链方法
-EccPoint EccPointmulBIN(BIGNUM k, EccPoint P, EccParams C);	//将k二进制表示
-EccPoint EccPointmulNAF(BIGNUM k, EccPoint P, EccParams C);	//将k用NAF表示
-EccPoint EccPointmulW_NAF(BIGNUM k, EccPoint P,int w,EccParams C);
+EccPoint EccPointMulBIN(BIGNUM, EccPoint, EccParams);	//将k二进制表示
+EccPoint EccPointMulNAF(BIGNUM, EccPoint, EccParams);	//将k用NAF表示
+EccPoint EccPointMulW_NAF(BIGNUM, EccPoint,int,EccParams); //w-NAF算法
 /*
-w-NAF算法 预见计算
+w-NAF算法 预计算表
 输入：k, P, 窗口宽度w, 椭圆曲线参数C
 输出：计算结果kP
 */
-EccPointStandardProjection EccPointmulNAFStandardProjection(BIGNUM k, EccPointStandardProjection P, EccParams C);	//标准射影坐标下的NAF点乘
-EccPointJacobian EccPointmulNAKJacobian(BIGNUM k, EccPointJacobian P, EccParams C);//雅可比坐标下的NAF点乘
+EccPointStandardProjection EccPointMulNAFStandardProjection(BIGNUM, EccPointStandardProjection, EccParams);	//标准射影坐标下的NAF点乘
 
-EccPoint EccPointmul4(BIGNUM k, EccPoint P, EccParams C);
+EccPointJacobian EccPointMul_NAF_Jacobian(BIGNUM, EccPointJacobian, EccParams);//雅可比坐标下的NAF点乘
+EccPointJacobian EccPointMul_W_NAF_Jacobian(BIGNUM, EccPointJacobian, int,EccParams);//雅可比坐标下的w-NAF点乘
 
-//拓展gcd求逆元 a * a^-1 = 1 (mod b)
-BIGNUM exgcd(BIGNUM a, BIGNUM b, BIGNUM& x, BIGNUM& y);
-BIGNUM modinverse(BIGNUM a,	BIGNUM b);  
-BIGNUM random(BIGNUM n); //生成一个随机数 ∈[1,n-1]
+
+EccPoint EccPointMul4(BIGNUM, EccPoint, EccParams);
+
+//拓展gcd求逆元
+BIGNUM exgcd(BIGNUM, BIGNUM, BIGNUM&, BIGNUM&);
+BIGNUM Mod_inverse(BIGNUM,BIGNUM);  
+
+//蒙哥马利模乘
+BIGNUM Montgomery_Multiply(BIGNUM, BIGNUM, BIGNUM);
+//蒙哥马利约简
+BIGNUM Montgomery_Reduction(BIGNUM, BIGNUM, BIGNUM);
+
+BIGNUM random(BIGNUM); //生成一个随机数 1 < m < n - 1
 
