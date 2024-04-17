@@ -128,14 +128,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BigNumber.cpp" />
-    <ClCompile Include="ECC.cpp" />
+    <ClCompile Include="BIGNUM.cpp" />
+    <ClCompile Include="Ecc.cpp" />
     <ClCompile Include="EllipticCurve.cpp" />
     <ClCompile Include="EllipticCurve.h" />
     <ClCompile Include="SM3.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BigNumber.h" />
+    <ClInclude Include="BIGNUM.h" />
     <ClInclude Include="SM3.h" />
   </ItemGroup>
   <ItemGroup>

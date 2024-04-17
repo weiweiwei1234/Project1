@@ -18,7 +18,7 @@
     <ClCompile Include="SM3.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ECC.cpp">
+    <ClCompile Include="Ecc.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="EllipticCurve.h">
@@ -27,10 +27,7 @@
     <ClCompile Include="EllipticCurve.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="BigNumber.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="BigNumber.cpp">
+    <ClCompile Include="BIGNUM.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,7 +35,7 @@
     <ClInclude Include="SM3.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="BigNumber.h">
+    <ClInclude Include="BIGNUM.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

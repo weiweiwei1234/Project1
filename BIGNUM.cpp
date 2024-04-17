@@ -1,10 +1,10 @@
-#include "BigNumber.h"
+#include "BIGNUM.h"
 // constructor
-BigNumber::BigNumber() {
-    BigNumber(0);
+BIGNUM::BIGNUM() {
+    BIGNUM(0);
 }
 
-BigNumber::BigNumber(long long input_number) {
+BIGNUM::BIGNUM(long long input_number) {
     long long unsign_number;
 
     // determine its positive(true) or negative(false)
@@ -21,7 +21,7 @@ BigNumber::BigNumber(long long input_number) {
     data.push_back(unsign_number);
 }
 
-BigNumber::BigNumber(const std::string& input_string) {
+BIGNUM::BIGNUM(const std::string& input_string) {
     sgn = !(input_string.front() == '-');
 
     for (auto i = input_string.rbegin(), end = input_string.rend(); i != end; ++i) {
@@ -37,31 +37,31 @@ BigNumber::BigNumber(const std::string& input_string) {
     }
 }
 
-BigNumber::BigNumber(bool input_sgn, const std::vector<int8_t>& input_data) {
+BIGNUM::BIGNUM(bool input_sgn, const std::vector<int8_t>& input_data) {
     sgn = input_sgn;
     data = input_data;
 }
 
-BigNumber::BigNumber(bool input_sgn, std::vector<int8_t>&& input_data) {
+BIGNUM::BIGNUM(bool input_sgn, std::vector<int8_t>&& input_data) {
     sgn = input_sgn;
     data = std::move(input_data);
 }
 
 
 // logical operators
-bool operator==(const BigNumber& lhs, const BigNumber& rhs) {
-    return (lhs.sgn == rhs.sgn) && (BigNumber::abs_compare(lhs, rhs) == EQUAL);
+bool operator==(const BIGNUM& lhs, const BIGNUM& rhs) {
+    return (lhs.sgn == rhs.sgn) && (BIGNUM::abs_compare(lhs, rhs) == EQUAL);
 }
 
-bool operator!=(const BigNumber& lhs, const BigNumber& rhs) {
+bool operator!=(const BIGNUM& lhs, const BIGNUM& rhs) {
     return !(lhs == rhs);
 }
 
-bool operator>(const BigNumber& lhs, const BigNumber& rhs) {
+bool operator>(const BIGNUM& lhs, const BIGNUM& rhs) {
     int abs_cmp;
 
     if (lhs.sgn == rhs.sgn) {
-        abs_cmp = BigNumber::abs_compare(lhs, rhs);
+        abs_cmp = BIGNUM::abs_compare(lhs, rhs);
         return ((lhs.sgn && abs_cmp == BIGGER) || (!lhs.sgn && abs_cmp == SMALLER));
     }
     else {
@@ -69,21 +69,21 @@ bool operator>(const BigNumber& lhs, const BigNumber& rhs) {
     }
 }
 
-bool operator<(const BigNumber& lhs, const BigNumber& rhs) {
+bool operator<(const BIGNUM& lhs, const BIGNUM& rhs) {
     return rhs > lhs;
 }
 
-bool operator>=(const BigNumber& lhs, const BigNumber& rhs) {
+bool operator>=(const BIGNUM& lhs, const BIGNUM& rhs) {
     return !(lhs < rhs);
 }
 
-bool operator<=(const BigNumber& lhs, const BigNumber& rhs) {
+bool operator<=(const BIGNUM& lhs, const BIGNUM& rhs) {
     return !(lhs > rhs);
 }
 
 
 // private method
-int BigNumber::abs_compare(const BigNumber& lhs, const BigNumber& rhs) {
+int BIGNUM::abs_compare(const BIGNUM& lhs, const BIGNUM& rhs) {
     if (lhs.data.size() > rhs.data.size()) {
         return BIGGER;
     }
@@ -104,14 +104,14 @@ int BigNumber::abs_compare(const BigNumber& lhs, const BigNumber& rhs) {
     return EQUAL;
 }
 
-void BigNumber::discard_leading_zero(std::vector<int8_t>& input) {
+void BIGNUM::discard_leading_zero(std::vector<int8_t>& input) {
     while (input.back() == 0 && input.size() != 1) {
         input.pop_back();
     }
 }
 
 // arithmetic operators
-const BigNumber operator+(const BigNumber& lhs, const BigNumber& rhs) {
+const BIGNUM operator+(const BIGNUM& lhs, const BIGNUM& rhs) {
     bool sgn;
     std::vector<int8_t> abs_result;
     unsigned long min_size;
@@ -156,17 +156,17 @@ const BigNumber operator+(const BigNumber& lhs, const BigNumber& rhs) {
     }
     else {
         if (!lhs.sgn) {
-            return rhs - BigNumber(!lhs.sgn, lhs.data);
+            return rhs - BIGNUM(!lhs.sgn, lhs.data);
         }
         else {
-            return lhs - BigNumber(!rhs.sgn, rhs.data);
+            return lhs - BIGNUM(!rhs.sgn, rhs.data);
         }
     }
 
-    return BigNumber(sgn, std::move(abs_result));
+    return BIGNUM(sgn, std::move(abs_result));
 }
 
-const BigNumber operator-(const BigNumber& lhs, const BigNumber& rhs) {
+const BIGNUM operator-(const BIGNUM& lhs, const BIGNUM& rhs) {
     bool sgn;
     std::vector<int8_t> abs_result;
     unsigned long min_size;
@@ -174,13 +174,13 @@ const BigNumber operator-(const BigNumber& lhs, const BigNumber& rhs) {
     // check is add or sub
     if (lhs.sgn != rhs.sgn) {
         // equal to do ADD operation
-        return lhs + BigNumber(!rhs.sgn, rhs.data);
+        return lhs + BIGNUM(!rhs.sgn, rhs.data);
     }
     else {
-        if (BigNumber::abs_compare(lhs, rhs) == EQUAL) {
-            return BigNumber(0);
+        if (BIGNUM::abs_compare(lhs, rhs) == EQUAL) {
+            return BIGNUM(0);
         }
-        else if (BigNumber::abs_compare(lhs, rhs) == BIGGER) {
+        else if (BIGNUM::abs_compare(lhs, rhs) == BIGGER) {
             sgn = lhs.sgn;
             // sub all first
             min_size = rhs.data.size();
@@ -207,18 +207,18 @@ const BigNumber operator-(const BigNumber& lhs, const BigNumber& rhs) {
         }
 
         //discard redundant zero
-        BigNumber::discard_leading_zero(abs_result);
+        BIGNUM::discard_leading_zero(abs_result);
     }
 
-    return BigNumber(sgn, std::move(abs_result));
+    return BIGNUM(sgn, std::move(abs_result));
 }
 
-const BigNumber operator*(const BigNumber& lhs, const BigNumber& rhs) {
+const BIGNUM operator*(const BIGNUM& lhs, const BIGNUM& rhs) {
     bool sgn;
     std::vector<int8_t> abs_result;
 
     if (lhs == 0 || rhs == 0) {
-        return BigNumber(0);
+        return BIGNUM(0);
     }
 
     sgn = (lhs.sgn == rhs.sgn);
@@ -233,16 +233,16 @@ const BigNumber operator*(const BigNumber& lhs, const BigNumber& rhs) {
         }
     }
     //discard redundant zero
-    BigNumber::discard_leading_zero(abs_result);
+    BIGNUM::discard_leading_zero(abs_result);
 
-    return BigNumber(sgn, abs_result);
+    return BIGNUM(sgn, abs_result);
 }
 
-const BigNumber operator/(const BigNumber& lhs, const BigNumber& rhs) {
-    BigNumber temp(0);
-    BigNumber remainder(true, lhs.data);
-    BigNumber divisor(true, rhs.data);
-    BigNumber quotient(0);
+const BIGNUM operator/(const BIGNUM& lhs, const BIGNUM& rhs) {
+    BIGNUM temp(0);
+    BIGNUM remainder(true, lhs.data);
+    BIGNUM divisor(true, rhs.data);
+    BIGNUM quotient(0);
     quotient.sgn = (lhs.sgn == rhs.sgn);
 
     int8_t count = 0;
@@ -252,7 +252,7 @@ const BigNumber operator/(const BigNumber& lhs, const BigNumber& rhs) {
             remainder.data.pop_back();
             quotient.data.insert(quotient.data.begin(), 0);
         }
-        BigNumber::discard_leading_zero(temp.data);
+        BIGNUM::discard_leading_zero(temp.data);
 
         count = 0;
         while (temp >= divisor) {
@@ -261,7 +261,7 @@ const BigNumber operator/(const BigNumber& lhs, const BigNumber& rhs) {
         }
         quotient.data.front() = count;
     }
-    BigNumber::discard_leading_zero(quotient.data);
+    BIGNUM::discard_leading_zero(quotient.data);
 
     // make -0 -> +0
     if (quotient.data.size() == 1 && quotient.data.back() == 0) {
@@ -271,15 +271,15 @@ const BigNumber operator/(const BigNumber& lhs, const BigNumber& rhs) {
     return quotient;
 }
 
-const BigNumber operator%(const BigNumber& lhs, const BigNumber& rhs) {
-    BigNumber temp(0);
-    BigNumber remainder(true, lhs.data);
-    BigNumber divisor(true, rhs.data);
+const BIGNUM operator%(const BIGNUM& lhs, const BIGNUM& rhs) {
+    BIGNUM temp(0);
+    BIGNUM remainder(true, lhs.data);
+    BIGNUM divisor(true, rhs.data);
 
-    if (BigNumber::abs_compare(lhs, rhs) == EQUAL) {
-        return BigNumber(0);
+    if (BIGNUM::abs_compare(lhs, rhs) == EQUAL) {
+        return BIGNUM(0);
     }
-    if (BigNumber::abs_compare(lhs, rhs) == SMALLER) {
+    if (BIGNUM::abs_compare(lhs, rhs) == SMALLER) {
         return lhs;
     }
     while (remainder >= divisor) {
@@ -290,7 +290,7 @@ const BigNumber operator%(const BigNumber& lhs, const BigNumber& rhs) {
             remainder.data.pop_back();
         }
 
-        BigNumber::discard_leading_zero(temp.data);
+        BIGNUM::discard_leading_zero(temp.data);
 
         while (temp >= divisor) {
             temp = temp - divisor;
@@ -298,7 +298,7 @@ const BigNumber operator%(const BigNumber& lhs, const BigNumber& rhs) {
         remainder.data.insert(remainder.data.end(), temp.data.begin(), temp.data.end());
         temp.data.clear();
     }
-    BigNumber::discard_leading_zero(remainder.data);
+    BIGNUM::discard_leading_zero(remainder.data);
     remainder.sgn = lhs.sgn;
     // make -0 -> +0
     if (remainder.data.size() == 1 && remainder.data.back() == 0) {
@@ -307,11 +307,11 @@ const BigNumber operator%(const BigNumber& lhs, const BigNumber& rhs) {
     return remainder;
 }
 
-//const BigNumber operator^(const BigNumber& lhs, const BigNumber& rhs)
+//const BIGNUM operator^(const BIGNUM& lhs, const BIGNUM& rhs)
 //{
 //   //rhs>1
-//    BigNumber base = lhs, exponent = rhs;
-//    BigNumber result = base;
+//    BIGNUM base = lhs, exponent = rhs;
+//    BIGNUM result = base;
 //    if (exponent == 1) return result;
 //    while (exponent > 1) {
 //        result = result * base;
@@ -321,7 +321,7 @@ const BigNumber operator%(const BigNumber& lhs, const BigNumber& rhs) {
 
 
 // output format
-std::ostream& operator<<(std::ostream& os, const BigNumber& rhs) {
+std::ostream& operator<<(std::ostream& os, const BIGNUM& rhs) {
     if (!rhs.sgn) {
         os << "-";
     }
@@ -340,7 +340,7 @@ std::ostream& operator<<(std::ostream& os, const BigNumber& rhs) {
     return os;
 }
 
-std::string BigNumber::get_value() {
+std::string BIGNUM::get_value() {
     std::string A = "";
 
     if (!sgn) {
@@ -359,7 +359,7 @@ std::string BigNumber::get_value() {
     return A;
 }//十六进制数字符串输出
 
-int BigNumber::to_int() {
+int BIGNUM::to_int() {
     int sum = 0, n = 0;
     for (auto i = data.begin(); i != data.end(); ++i) {
         // i is a pointer, point to a certain position in the vector (rhs.data)
