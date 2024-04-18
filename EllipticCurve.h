@@ -92,7 +92,7 @@ BIGNUM Mod_inverse(BIGNUM,BIGNUM);
 //蒙哥马利模乘
 BIGNUM Montgomery_Multiply(BIGNUM, BIGNUM, BIGNUM);
 //蒙哥马利约简
-BIGNUM Montgomery_Reduction(BIGNUM, BIGNUM, BIGNUM);
+BIGNUM Montgomery_Reduction(BIGNUM, BIGNUM);
 
 BIGNUM random(BIGNUM); //生成一个随机数 1 < m < n - 1
 

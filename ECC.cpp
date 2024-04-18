@@ -20,6 +20,12 @@ int main() {
 	EccPointJacobian G_Jacobian = AffineTOJacobian(G);
 	long t1, t2;//计算运行时间，t1:开始时间,t2:结束时间
 
-	test1();
+	BIGNUM a1("ABCD");
+	cout << a.bitlen() << endl;
+	cout << (a1 << 24 ) << endl;
+	cout << a * a << endl;
+	cout << a * a % p << endl;
+	cout << Montgomery_Multiply(a, a, p) << endl;
+	//test1();
 	return 0;
 }

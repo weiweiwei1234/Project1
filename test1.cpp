@@ -26,7 +26,7 @@ static void test1() {
 	printEccParams(C);
 	printEccPoint(G);
 	printEccPointJacobian(G_Jacobian);
-	BIGNUM k("ABCDEF");
+	BIGNUM k("ABEEEEEEEEEEEEEEEEEEECDEF");
 
 	cout << "\n二进制表示：" << endl;
 	t1 = GetTickCount64();

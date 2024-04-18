@@ -7,13 +7,13 @@ BIGNUM::BIGNUM() {
 BIGNUM::BIGNUM(long long input_number) {
     long long unsign_number;
 
-    // determine its positive(true) or negative(false)
+    // 判断正负
     sgn = !(input_number < 0);
 
-    // make number positive
+    // 取数据绝对值
     unsign_number = (input_number < 0) ? -input_number : input_number;
 
-    // turn this integer to hex and store it to data
+    // 转换为16进制字符串
     while (unsign_number >= 16) {
         data.push_back(unsign_number & 15); // mod 16
         unsign_number = unsign_number >> 4; // div 16
@@ -82,7 +82,7 @@ bool operator<=(const BIGNUM& lhs, const BIGNUM& rhs) {
 }
 
 
-// private method
+// 判断相等
 int BIGNUM::abs_compare(const BIGNUM& lhs, const BIGNUM& rhs) {
     if (lhs.data.size() > rhs.data.size()) {
         return BIGGER;
@@ -103,7 +103,7 @@ int BIGNUM::abs_compare(const BIGNUM& lhs, const BIGNUM& rhs) {
 
     return EQUAL;
 }
-
+//消除前置0
 void BIGNUM::discard_leading_zero(std::vector<int8_t>& input) {
     while (input.back() == 0 && input.size() != 1) {
         input.pop_back();
@@ -116,22 +116,22 @@ const BIGNUM operator+(const BIGNUM& lhs, const BIGNUM& rhs) {
     std::vector<int8_t> abs_result;
     unsigned long min_size;
     int8_t carry, sum;
-
+    //min_size取数据长度较小的那个
     min_size = (lhs.data.size() < rhs.data.size()) ? lhs.data.size() : rhs.data.size();
 
-    // check is add or sub
+    // 同号相加，异号相减
     if (lhs.sgn == rhs.sgn) {
-        // same sign
+        // 同号
         sgn = lhs.sgn;
         carry = 0;
 
-        // add all first
+        // 做加法
         for (unsigned long i = 0; i < min_size; i++) {
             sum = lhs.data[i] + rhs.data[i];
             abs_result.push_back(sum);
         }
 
-        // insert remain digit
+        // 插入剩余的数
         if (lhs.data.size() > rhs.data.size()) {
             for (unsigned long i = min_size; i < lhs.data.size(); i++) {
                 abs_result.push_back(lhs.data[i]);
@@ -143,7 +143,7 @@ const BIGNUM operator+(const BIGNUM& lhs, const BIGNUM& rhs) {
             }
         }
 
-        // handle carry
+        // 处理进位
         carry = 0;
         for (unsigned long i = 0; i < abs_result.size(); i++) {
             sum = abs_result[i] + carry;
@@ -155,6 +155,7 @@ const BIGNUM operator+(const BIGNUM& lhs, const BIGNUM& rhs) {
         }
     }
     else {
+        //异号 相当于做减法
         if (!lhs.sgn) {
             return rhs - BIGNUM(!lhs.sgn, lhs.data);
         }
@@ -171,9 +172,9 @@ const BIGNUM operator-(const BIGNUM& lhs, const BIGNUM& rhs) {
     std::vector<int8_t> abs_result;
     unsigned long min_size;
 
-    // check is add or sub
+    // 同号相加，异号相减
     if (lhs.sgn != rhs.sgn) {
-        // equal to do ADD operation
+        // 异号 相当于做加法
         return lhs + BIGNUM(!rhs.sgn, rhs.data);
     }
     else {
@@ -182,23 +183,23 @@ const BIGNUM operator-(const BIGNUM& lhs, const BIGNUM& rhs) {
         }
         else if (BIGNUM::abs_compare(lhs, rhs) == BIGGER) {
             sgn = lhs.sgn;
-            // sub all first
+            // 做减法
             min_size = rhs.data.size();
             abs_result.resize(lhs.data.size());
             std::transform(lhs.data.begin(), lhs.data.begin() + min_size, rhs.data.begin(), abs_result.begin(), std::minus<int8_t>());
-            // insert remain digit
+            // 插入剩余的数
             std::copy(lhs.data.begin() + min_size, lhs.data.end(), abs_result.begin() + min_size);
         }
         else {
             sgn = !rhs.sgn;
-            // sub all first
+            // 做减法
             min_size = lhs.data.size();
             abs_result.resize(rhs.data.size());
             std::transform(rhs.data.begin(), rhs.data.begin() + min_size, lhs.data.begin(), abs_result.begin(), std::minus<int8_t>());
-            // insert remain digit
+            // 插入剩余的数
             std::copy(rhs.data.begin() + min_size, rhs.data.end(), abs_result.begin() + min_size);
         }
-        // handle borrow
+        // 处理借位
         for (unsigned long i = 0; i < abs_result.size(); i++) {
             if (abs_result[i] < 0) {
                 abs_result[i] += 16;
@@ -206,7 +207,7 @@ const BIGNUM operator-(const BIGNUM& lhs, const BIGNUM& rhs) {
             }
         }
 
-        //discard redundant zero
+        //消除前置0
         BIGNUM::discard_leading_zero(abs_result);
     }
 
@@ -232,7 +233,7 @@ const BIGNUM operator*(const BIGNUM& lhs, const BIGNUM& rhs) {
             abs_result[i + j + 1] += sum / 16; // carry
         }
     }
-    //discard redundant zero
+    //消除前置0
     BIGNUM::discard_leading_zero(abs_result);
 
     return BIGNUM(sgn, abs_result);
@@ -263,7 +264,7 @@ const BIGNUM operator/(const BIGNUM& lhs, const BIGNUM& rhs) {
     }
     BIGNUM::discard_leading_zero(quotient.data);
 
-    // make -0 -> +0
+    // -0 -> +0
     if (quotient.data.size() == 1 && quotient.data.back() == 0) {
         quotient.sgn = true;
     }
@@ -300,7 +301,7 @@ const BIGNUM operator%(const BIGNUM& lhs, const BIGNUM& rhs) {
     }
     BIGNUM::discard_leading_zero(remainder.data);
     remainder.sgn = lhs.sgn;
-    // make -0 -> +0
+    // -0 -> +0
     if (remainder.data.size() == 1 && remainder.data.back() == 0) {
         remainder.sgn = true;
     }
@@ -318,7 +319,59 @@ const BIGNUM operator%(const BIGNUM& lhs, const BIGNUM& rhs) {
 //    }
 //    return result;
 //}
+// 
+//右移 k 位 相当于除以2^k
+const BIGNUM operator>>(const BIGNUM& lhs, const int& rhs) {
+    BIGNUM temp(lhs.sgn, lhs.data);
+    std::string str = temp.HexToBin();
+    if (str.length() <= rhs)
+        return BIGNUM(0);
+    str = str.substr(0, str.length() - rhs);
 
+    std::string hex = "";//用来存储最后生成的十六进制数
+    int t = 0;//用来存储每次四位二进制数的十进制值
+    while (str.size() % 4 != 0) {//因为每四位二进制数就能够成为一个十六进制数，所以将二进制数长度转换为4的倍数
+        str = "0" + str;//最高位添0直到长度为4的倍数即可
+    }
+    for (int i = 0; i < str.size(); i += 4) {
+        t = (str[i] - '0') * 8 + (str[i + 1] - '0') * 4 + (str[i + 2] - '0') * 2 + (str[i + 3] - '0') * 1;//判断出4位二进制数的十进制大小为多少
+        if (t < 10) {//当得到的值小于10时，可以直接用0-9来代替
+            hex += to_string(t);
+        }
+        else {//当得到的值大于10时，需要进行A-F的转换
+            hex += 'A' + (t - 10);
+        }
+    }
+    if (temp.sgn == false)
+        hex = "-" + hex;
+    return BIGNUM(hex);
+}
+//左移 k 位 相当于乘以2^k
+const BIGNUM operator<<(const BIGNUM& lhs, const int& rhs) {
+    BIGNUM temp(lhs.sgn, lhs.data);
+    std::string str = temp.HexToBin();
+    for (int i = 0; i < rhs; i++) {
+        str = str + "0";
+    }
+
+    std::string hex = "";//用来存储最后生成的十六进制数
+    int t = 0;//用来存储每次四位二进制数的十进制值
+    while (str.size() % 4 != 0) {//因为每四位二进制数就能够成为一个十六进制数，所以将二进制数长度转换为4的倍数
+        str = "0" + str;//最高位添0直到长度为4的倍数即可
+    }
+    for (int i = 0; i < str.size(); i += 4) {
+        t = (str[i] - '0') * 8 + (str[i + 1] - '0') * 4 + (str[i + 2] - '0') * 2 + (str[i + 3] - '0') * 1;//判断出4位二进制数的十进制大小为多少
+        if (t < 10) {//当得到的值小于10时，可以直接用0-9来代替
+            hex += to_string(t);
+        }
+        else {//当得到的值大于10时，需要进行A-F的转换
+            hex += 'A' + (t - 10);
+        }
+    }
+    if (temp.sgn == false)
+        hex = "-" + hex;
+    return BIGNUM(hex);
+}
 
 // output format
 std::ostream& operator<<(std::ostream& os, const BIGNUM& rhs) {
@@ -378,4 +431,28 @@ int BIGNUM::to_int() {
     else {
         return sum;
     }
-}//十六进制数转十进制
+}
+int BIGNUM::bitlen()
+{
+    int length = HexToBin().length();
+    return length;
+}
+std::string BIGNUM::HexToBin()
+{
+    std::string str = get_value();
+    std::string bin = "";
+    std::string table[16] = { "0000","0001","0010","0011","0100","0101","0110","0111","1000","1001","1010","1011","1100","1101","1110","1111" };
+    for (int i = 0; i < str.size(); i++) {
+        if (str[i] >= 'A' && str[i] <= 'F') {
+            bin += table[str[i] - 'A' + 10];
+        }
+        else {
+            bin += table[str[i] - '0'];
+        }
+    }
+    while (bin[0]=='0') {
+            bin.erase(0, 1);
+    }
+    return bin;
+}
+//十六进制数转十进制

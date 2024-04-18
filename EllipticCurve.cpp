@@ -520,12 +520,12 @@ BIGNUM Mod_inverse(BIGNUM a, BIGNUM b)
 //		y=MD(X1,R,N) = X1/R=ab(mod N)
 BIGNUM Montgomery_Multiply(BIGNUM a , BIGNUM b, BIGNUM N)
 {
-	BIGNUM R;
-	BIGNUM a_ = a * R % N;
-	BIGNUM b_ = b * R % N;
+	//BIGNUM R = 2 << N.bitlen();
+	BIGNUM a_ = (a << N.bitlen()) % N;
+	BIGNUM b_ = (b << N.bitlen()) % N;
 	BIGNUM X = a_ * b_;
-	BIGNUM X1 = Montgomery_Reduction(X, R, N);
-	BIGNUM y = Montgomery_Reduction(X1, R, N);
+	BIGNUM X1 = Montgomery_Reduction(X, N);
+	BIGNUM y = Montgomery_Reduction(X1, N);
 	return y;
 }
 // 已知 a,b,N
@@ -536,11 +536,15 @@ BIGNUM Montgomery_Multiply(BIGNUM a , BIGNUM b, BIGNUM N)
 //		m=XN'(mod R);
 //	2.计算 y=(X+mN)/R: X+mN >> k;
 //  3.若y>N,则y=y-N; 
-BIGNUM Montgomery_Reduction(BIGNUM X, BIGNUM R, BIGNUM N)
+BIGNUM Montgomery_Reduction(BIGNUM X, BIGNUM N)
 {
-	BIGNUM N_;
+	BIGNUM R = BIGNUM(2) << N.bitlen();
+	BIGNUM N_, R_;
+	BIGNUM d = exgcd(R, N, R_, N_);
+	if (d == 1) N_ = BIGNUM(0) - N_;
+	else N_ = N_;
 	BIGNUM m = X * N_ % R;
-	BIGNUM y = (X + m * N) / R;//R=2^k y = X + mN >> k
+	BIGNUM y = (X + m * N) >> N.bitlen();//R=2^k y = X + mN >> k
 	if (y > N) y = y - N;
 	return y;
 }
