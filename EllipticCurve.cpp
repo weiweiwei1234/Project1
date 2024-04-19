@@ -504,10 +504,11 @@ BIGNUM exgcd(BIGNUM a, BIGNUM b, BIGNUM &x, BIGNUM &y)
 
 BIGNUM Mod_inverse(BIGNUM a, BIGNUM b)
 {
+	Sleep(100);
 	BIGNUM x, y;
 	BIGNUM gcd = exgcd(a, b, x, y); //最大公因子可能为1或者-1
 	if (gcd == -1) return 0 - x;
-	return x;
+	return (x % b + b) % b;
 }
 // 输入：a,b,N
 // 输出：y=ab (mod N)
@@ -549,7 +550,14 @@ BIGNUM Montgomery_Reduction(BIGNUM X, BIGNUM N)
 	return y;
 }
 
-BIGNUM random(BIGNUM n)
+BIGNUM random(int len)
 {
-	return BIGNUM();
+	string res = "";
+	srand(time(NULL));
+	char hex[16] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
+	for (int i = 1; i <= len; i++) {
+		int x = rand() % 16;
+		res += hex[x];
+	}
+	return BIGNUM(res);
 }

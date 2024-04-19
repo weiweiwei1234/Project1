@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <limits>
 using namespace std;
-static void test1() {
+void test1() {
 	BIGNUM p("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF");
 	BIGNUM a("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC");
 	BIGNUM b("28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93");
@@ -26,7 +26,7 @@ static void test1() {
 	printEccParams(C);
 	printEccPoint(G);
 	printEccPointJacobian(G_Jacobian);
-	BIGNUM k("ABEEEEEEEEEEEEEEEEEEECDEF");
+	BIGNUM k("ABCD");
 
 	cout << "\n二进制表示：" << endl;
 	t1 = GetTickCount64();

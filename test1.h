@@ -1,2 +1,2 @@
 #pragma once
-static void test1();
+void test1();

@@ -19,13 +19,17 @@ int main() {
 	EccParams C = { p,a,b,n,Gx,Gy };
 	EccPointJacobian G_Jacobian = AffineTOJacobian(G);
 	long t1, t2;//计算运行时间，t1:开始时间,t2:结束时间
-
+	
+	test1();
+	cout << random(64) << endl;
 	BIGNUM a1("ABCD");
+	cout << Mod_inverse(2, p) << endl;
+	cout << 2 * Mod_inverse(2, p) % p << endl;
 	cout << a.bitlen() << endl;
 	cout << (a1 << 24 ) << endl;
-	cout << a * a << endl;
-	cout << a * a % p << endl;
+	cout << a * b << endl;
+	cout << a * b % p << endl;
 	cout << Montgomery_Multiply(a, a, p) << endl;
-	//test1();
+	//
 	return 0;
 }

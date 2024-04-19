@@ -94,5 +94,5 @@ BIGNUM Montgomery_Multiply(BIGNUM, BIGNUM, BIGNUM);
 //蒙哥马利约简
 BIGNUM Montgomery_Reduction(BIGNUM, BIGNUM);
 
-BIGNUM random(BIGNUM); //生成一个随机数 1 < m < n - 1
+BIGNUM random(int); //生成一个随机数 1 < m < n - 1
 
