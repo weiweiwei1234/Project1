@@ -2,7 +2,10 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <cmath>
+#include <cctype>
+#include <algorithm>
 using namespace std;
 string BinToHex(string str);							//二进制转换为十六进制函数实现
 string HexToBin(string str);							//十六进制转换为二进制函数实现

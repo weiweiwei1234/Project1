@@ -266,9 +266,6 @@ EccPoint EccPointMulBIN(BIGNUM k, EccPoint P, EccParams C)
 	if (k == 1) return P;
 	EccPoint R = {BIGNUM(0),BIGNUM(0)};
 	EccPoint L = P;
-	//string k_str = k.get_value();
-	//string k_str_BIN = HexToBin(k_str);
-	//cout << k << "的二进制表示为" << k_str_BIN << endl;
 	while (k > 0) {
 		if (k % 2 == 1) {
 			R = EccPointAdd(R, L, C);

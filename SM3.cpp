@@ -85,10 +85,18 @@ string DecToHex(int str) {
 }
 
 string padding(string str) {//对数据进行填充 
-	string res = "";
-	for (int i = 0; i < str.size(); i++) {//首先将输入值转换为16进制字符串
-		res += DecToHex((int)str[i]);
+	string res;
+	//for (int i = 0; i < str.size(); i++) {//首先将输入值转换为16进制字符串
+	//	res += DecToHex((int)str[i]);
+	//}
+	
+	//将含有中文的字符串编码为16进制字符串形式
+	stringstream ss;
+	for (char c : str) {
+		ss << std::hex << (int)(unsigned char)c;
 	}
+	res = ss.str();
+	transform(res.begin(), res.end(), res.begin(), ::toupper);
 	int res_length = res.size() * 4;//记录的长度为2进制下的长度
 	res += "8";//在获得的数据后面添1，在16进制下相当于是添加8
 	while (res.size() % 128 != 112) {
