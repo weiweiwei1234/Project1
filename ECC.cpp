@@ -25,7 +25,7 @@ int main() {
 	printEccPoint(G);
 	printEccPointJacobian(G_Jacobian);
 
-	cout << "a = " << a << endl;
+	/*cout << "a = " << a << endl;
 	cout << "b = " << b << endl;
 	cout << "p = " << p << endl;
 	cout << "a + b = " << a + b << endl;
@@ -33,9 +33,9 @@ int main() {
 	cout << "a * b = " << a * b << endl;
 	cout << "a * b % p = " << a * b % p << endl;
 	cout << "a << 64 = " << (a << 64) << endl;
-	cout << "a >> 64 = " << (a >> 64) << endl;
+	cout << "a >> 64 = " << (a >> 64) << endl;*/
 	test1();
-	cout << random(64) << endl;
+	/*cout << random(64) << endl;
     BIGNUM a1("ABCD");
 	cout << "2 mod pµÄÄæÔª:" << Mod_inverse(2, p) << endl;
 	cout << "2 * Mod_inverse(2,p) mod p = " << 2 * Mod_inverse(2, p) % p << endl;
@@ -46,7 +46,7 @@ int main() {
 	cout << (a1 << 24 ) << endl;
 	cout << a * b << endl;
 	cout << a * b % p << endl;
-	cout << Montgomery_Multiply(a, a, p) << endl;
+	cout << Montgomery_Multiply(a, a, p) << endl;*/
 
 	//string str;
 	//cout << "ÇëÊäÈë×Ö·û´®£º" << endl;

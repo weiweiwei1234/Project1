@@ -77,11 +77,13 @@ w-NAF算法 预计算表
 输入：k, P, 窗口宽度w, 椭圆曲线参数C
 输出：计算结果kP
 */
-EccPointStandardProjection EccPointMulNAFStandardProjection(BIGNUM, EccPointStandardProjection, EccParams);	//标准射影坐标下的NAF点乘
+EccPointStandardProjection EccPointMulBINStandardProjection(BIGNUM, EccPointStandardProjection, EccParams);//标准射影坐标下的二进制表示
+EccPointStandardProjection EccPointMulNAFStandardProjection(BIGNUM, EccPointStandardProjection, EccParams);	//标准射影坐标下的NAF表示
+EccPointStandardProjection EccPointMul_W_NAF_StandardProjection(BIGNUM, EccPointStandardProjection, int, EccParams);//标准射影坐标下的w-NAF表示
 
+EccPointJacobian EccPointMulBINJacobian(BIGNUM, EccPointJacobian, EccParams);//雅可比坐标下的二进制表示
 EccPointJacobian EccPointMul_NAF_Jacobian(BIGNUM, EccPointJacobian, EccParams);//雅可比坐标下的NAF点乘
 EccPointJacobian EccPointMul_W_NAF_Jacobian(BIGNUM, EccPointJacobian, int,EccParams);//雅可比坐标下的w-NAF点乘
-
 
 EccPoint EccPointMul4(BIGNUM, EccPoint, EccParams);
 

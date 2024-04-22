@@ -363,8 +363,24 @@ EccPoint EccPointMulW_NAF(BIGNUM k, EccPoint P, int w, EccParams C)
 	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
 	return R;
 }
+//标准射影坐标下的二进制表示
+EccPointStandardProjection EccPointMulBINStandardProjection(BIGNUM k, EccPointStandardProjection P, EccParams C)
+{
+	if (k == 0) return { BIGNUM(0), BIGNUM(0),BIGNUM{0} };
+	if (k == 1) return P;
+	EccPointStandardProjection R = { BIGNUM(0),BIGNUM(0) ,BIGNUM{0} };
+	EccPointStandardProjection L = P;
+	while (k > 0) {
+		if (k % 2 == 1) {
+			R = EccPointAddStandardProjection(R, L, C);
+		}
+		L = EccPointAddStandardProjection(L, L, C);
+		k = k / 2;
+	}
+	return R;
+}
 
-//射影坐标 不使用
+//标准射影坐标下的NAF表示
 EccPointStandardProjection EccPointMulNAFStandardProjection(BIGNUM k, EccPointStandardProjection P, EccParams C)
 {
 	if (k == 0) return { BIGNUM(0),BIGNUM(1),BIGNUM(0) };
@@ -394,6 +410,69 @@ EccPointStandardProjection EccPointMulNAFStandardProjection(BIGNUM k, EccPointSt
 			R = EccPointAddStandardProjection(R, P, C);
 		if (NAF_k[j] == -1)
 			R = EccPointAddStandardProjection(R, _P, C);
+	}
+	return R;
+}
+
+EccPointStandardProjection EccPointMul_W_NAF_StandardProjection(BIGNUM k, EccPointStandardProjection P, int w, EccParams C)
+{
+	if (k == 0) return { BIGNUM(0),BIGNUM(0),BIGNUM(0) };
+	if (k == 1) return P;
+	EccPointStandardProjection R{ BIGNUM(0), BIGNUM(0),BIGNUM(0) };
+	BIGNUM k1 = k;
+	//用w计算预计算表 计算iP i=1,3,5,...,2^(w-1)-1
+	EccPointStandardProjection Pi[64];
+	EccPointStandardProjection P_2 = EccPointAddStandardProjection(P, P, C);
+	for (int j = 1; j < (int)pow(2, w); j = j + 2) {
+		if (j == 1) Pi[j] = P;
+		else
+			Pi[j] = EccPointAddStandardProjection(Pi[j - 2], P_2, C);
+	}
+	int i = 0;
+	int NAFW[1025] = { 0 };
+	BIGNUM w2((int)pow(2, w));
+	while (k1 >= 1) {
+		if (k1 % 2 == 1) {
+			NAFW[i] = BIGNUM(k1 % w2).to_int();
+			while (NAFW[i] > pow(2, w - 1)) {
+				NAFW[i] = NAFW[i] - pow(2, w);
+			}
+			k1 = k1 - BIGNUM(NAFW[i]);
+		}
+		else {
+			NAFW[i] = 0;
+		}
+		k1 = k1 / 2;
+		i++;
+	}
+	long t1, t2;//计算运行时间，t1:开始时间,t2:结束时间
+	t1 = GetTickCount64();
+	for (int j = i - 1; j >= 0; j--) {
+		R = EccPointAddStandardProjection(R, R, C);
+		if (NAFW[j] > 0) {
+			R = EccPointAddStandardProjection(R, Pi[NAFW[j]], C);
+		}
+		if (NAFW[j] < 0) {
+			R = EccPointAddStandardProjection(R, { Pi[-NAFW[j]].x,0 - Pi[-NAFW[j]].y, Pi[-NAFW[j]].z }, C);
+		}
+	}
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
+	return R;
+}
+
+EccPointJacobian EccPointMulBINJacobian(BIGNUM k, EccPointJacobian P, EccParams C)
+{
+	if (k == 0) return { BIGNUM(1), BIGNUM(1),BIGNUM{0} };
+	if (k == 1) return P;
+	EccPointJacobian R = { BIGNUM(1),BIGNUM(1) ,BIGNUM{0} };
+	EccPointJacobian L = P;
+	while (k > 0) {
+		if (k % 2 == 1) {
+			R = EccPointAddJacobian(R, L, C);
+		}
+		L = EccPointAddJacobian(L, L, C);
+		k = k / 2;
 	}
 	return R;
 }
@@ -501,7 +580,7 @@ BIGNUM exgcd(BIGNUM a, BIGNUM b, BIGNUM &x, BIGNUM &y)
 
 BIGNUM Mod_inverse(BIGNUM a, BIGNUM b)
 {
-	Sleep(100);
+	//Sleep(100);
 	BIGNUM x, y;
 	BIGNUM gcd = exgcd(a, b, x, y); //最大公因子可能为1或者-1
 	if (gcd == -1) return 0 - x;

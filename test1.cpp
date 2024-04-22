@@ -18,6 +18,7 @@ void test1() {
 	BIGNUM Gy("BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0");
 	EccPoint G = { Gx,Gy };
 	EccParams C = { p,a,b,n,Gx,Gy };
+	EccPointStandardProjection G_SP = AffineToStandardProjection(G);
 	EccPointJacobian G_Jacobian = AffineTOJacobian(G);
 	long t1, t2;//计算运行时间，t1:开始时间,t2:结束时间
 
@@ -27,9 +28,9 @@ void test1() {
 	printEccParams(C);
 	printEccPoint(G);
 	printEccPointJacobian(G_Jacobian);
-	BIGNUM k("ABCD");
+	BIGNUM k("ABCDEF");
 
-	cout << "\n二进制表示：" << endl;
+	cout << "\n二进制表示（仿射坐标）：" << endl;
 	t1 = GetTickCount64();
 	EccPoint Pk2 = EccPointMulBIN(k, G, C);
 	t2 = GetTickCount64();
@@ -46,6 +47,30 @@ void test1() {
 	cout << "\n使用w-NAF方法（仿射坐标）:" << endl;
 	EccPoint Pk3_ = EccPointMulW_NAF(k, G, 6, C);
 	printEccPoint(Pk3_);
+
+	cout << "\n使用二进制表示（标准射影坐标）：" << endl;
+	t1 = GetTickCount64();
+	EccPointStandardProjection SP1 = EccPointMulBINStandardProjection(k,G_SP,C);
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;
+
+	cout << "\n使用NAF方法（标准射影坐标）：" << endl;
+	t1 = GetTickCount64();
+	EccPointStandardProjection SP2 = EccPointMulNAFStandardProjection(k, G_SP, C);
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
+
+	cout << "\n使用w-NAF方法：" << endl;
+	t1 = GetTickCount64();
+	EccPointStandardProjection SP2 = EccPointMul_W_NAF_StandardProjection(k, G_SP, 6, C);
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
+
+	cout << "\n使用二进制表示（Jacobian加重射影坐标）：" << endl;
+	t1 = GetTickCount64();
+	EccPointJacobian SP1 = EccPointMulBINJacobian(k, G_Jacobian, C);
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;
 
 	cout << "\n使用NAF方法（Jacobian加重射影坐标）：" << endl;
 	t1 = GetTickCount64();
