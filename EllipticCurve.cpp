@@ -43,7 +43,7 @@ bool isinEccParams(EccPoint point, EccParams C)
 	x = (point.x + p) % p;
 	y = (point.y + p) % p;
 	BIGNUM Left = y * y % p;
-	BIGNUM Right = x * x % p * x % p + a * x % p + b;
+	BIGNUM Right = x * x * x+ a * x + b;
 	Left = (Left + p) % p;
 	Right = (Right + p) % p;
 	/*cout << Left << endl;
@@ -62,7 +62,7 @@ bool isinEccParamsStandardProjection(EccPointStandardProjection point, EccParams
 	a = C.a;
 	b = C.b;
 	p = C.p;
-	if (y * y % p * z % p == (x * x % p * x % p + a * x % p * z %p * z %p + b * z % p * z % p * z %p) % p) {
+	if (y * y * z % p == (x * x * x + a * x * z * z + b * z * z * z) % p) {
 		return true;
 	}
 	return false;
@@ -77,7 +77,7 @@ bool isinEccParamsJacobian(EccPointJacobian point, EccParams C)
 	a = C.a;
 	b = C.b;
 	p = C.p;
-	if ((y * y) % p == (x * x % p * x + a * x % p * z % p * z % p * z % p * z + b * z %p * z % p  * z % p * z % p * z % p * z % p) % p){
+	if ((y * y) % p == (x * x * x + a * x * z * z * z * z + b * z * z * z * z * z * z) % p){
 		return true;
 	}
 	return false;
@@ -108,8 +108,8 @@ EccPointJacobian AffineTOJacobian(EccPoint P)
 EccPoint JacobianToAffine(EccPointJacobian P, EccParams C)
 {
 	EccPoint R;
-	R.x = P.x * Mod_inverse(P.z * P.z % C.p, C.p);
-	R.y = P.y * Mod_inverse(P.z * P.z % C.p * P.z % C.p, C.p);
+	R.x = P.x * Mod_inverse(P.z * P.z , C.p);
+	R.y = P.y * Mod_inverse(P.z * P.z * P.z, C.p);
 	R.x = (R.x % C.p + C.p) % C.p;
 	R.y = (R.y % C.p + C.p) % C.p;
 	return R;
@@ -133,13 +133,13 @@ EccPoint EccPointAdd(EccPoint P, EccPoint Q, EccParams C)
 		cout << "P、Q必须在椭圆曲线上" << endl;
 	BIGNUM k;	//斜率k
 	if (P.x != Q.x) {
-		k = (y2 - y1) * Mod_inverse(x2 - x1, p) % p;
+		k = (y2 - y1) * Mod_inverse(x2 - x1, p);
 	}
 	else {
-		k = (3 * x1 * x1 % p + a) * Mod_inverse(2 * y1 % p, p) % p;
+		k = (3 * x1 * x1 + a) * Mod_inverse(2 * y1, p);
 	}
-	x3 = k * k % p- x1 - x2;
-	y3 = k * (x1 - x3) % p - y1;
+	x3 = k * k - x1 - x2;
+	y3 = k * (x1 - x3) - y1;
 	x3 = (x3 % p + p) % p;
 	y3 = (y3 % p + p) % p;
 	R = { x3,y3 };
@@ -166,34 +166,34 @@ EccPointStandardProjection EccPointAddStandardProjection(EccPointStandardProject
 	p = C.p;
 	if (P.x != Q.x && P.y != Q.y && P.z != Q.z) {
 		BIGNUM t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11;
-		t1 = x1 * z2 % p;
-		t2 = x2 * z1 % p;
+		t1 = x1 * z2;
+		t2 = x2 * z1;
 		t3 = t1 - t2;
-		t4 = y1 * z2 % p;
-		t5 = y2 * z1 % p;
+		t4 = y1 * z2;
+		t5 = y2 * z1;
 		t6 = t4 - t5;
 		t7 = t1 + t2;
-		t8 = z1 * z2 % p;
-		t9 = t3 * t3 % p;
-		t10 = t3 * t9 % p;
-		t11 = t8 * t6 % p * t6 % p - t7 * t9 % p;
+		t8 = z1 * z2;
+		t9 = t3 * t3;
+		t10 = t3 * t9;
+		t11 = t8 * t6 * t6 - t7 * t9;
 		//得到R的射影坐标
-		x3 = t3 * t11 % p;
-		y3 = t6 * (t9 * t1 % p - t11) % p - t4 * t10 % p;
-		z3 = t10 * t8 % p;
+		x3 = t3 * t11;
+		y3 = t6 * (t9 * t1 - t11) - t4 * t10;
+		z3 = t10 * t8;
 	}
 	else {
 		BIGNUM t1, t2, t3, t4, t5, t6;
-		t1 = 3 * x1 % p * x1 % p + a * z1 % p * z1 % p;
-		t2 = 2 * y1 % p * z1 % p;
-		t3 = y1 * y1 % p;
-		t4 = t3 * x1 % p * z1 % p;
-		t5 = t2 * t2 % p;
-		t6 = t1 * t1 % p - 8 * t4 % p;
+		t1 = 3 * x1 * x1 + a * z1 * z1;
+		t2 = 2 * y1 * z1;
+		t3 = y1 * y1;
+		t4 = t3 * x1 * z1;
+		t5 = t2 * t2;
+		t6 = t1 * t1 - 8 * t4;
 		//得到R的射影坐标
-		x3 = t2 * t6 % p;
-		y3 = t1 * (4 * t4 % p - t6) % p - 2 * t5 % p * t3 % p;
-		z3 = t2 * t5 % p;
+		x3 = t2 * t6;
+		y3 = t1 * (4 * t4 - t6) - 2 * t5 * t3;
+		z3 = t2 * t5;
 	}
 	x3 = (x3 % p + p) % p;
 	y3 = (y3 % p + p) % p;
@@ -221,29 +221,29 @@ EccPointJacobian EccPointAddJacobian(EccPointJacobian P, EccPointJacobian Q, Ecc
 	p = C.p;
 	if (P.x != Q.x && P.y != Q.y && P.z != Q.z) {
 		BIGNUM t1, t2, t3, t4, t5, t6, t7, t8, t9;
-		t1 = x1 * z2 % p * z2 % p;
-		t2 = x2 * z1 % p * z1 % p;
+		t1 = x1 * z2 * z2;
+		t2 = x2 * z1 * z1;
 		t3 = t1 - t2;
-		t4 = y1 * z2 % p * z2 % p * z2 % p;
-		t5 = y2 * z1 % p * z1 % p * z1 % p;
+		t4 = y1 * z2 * z2 * z2;
+		t5 = y2 * z1 * z1 * z1;
 		t6 = t4 - t5;
 		t7 = t1 + t2;
 		t8 = t4 + t5;
 		//得到R的雅可比坐标
-		x3 = t6 * t6 % p - t7 * t3 % p * t3 % p;
-		t9 = t7 * t3 % p * t3 % p - 2 * x3 % p;
-		y3 = (t9 * t6 % p - t8 * t3 % p * t3 % p * t3 % p) * Mod_inverse(2, p) % p;
-		z3 = z1 * z2 % p * t3 % p;
+		x3 = t6 * t6 - t7 * t3 * t3;
+		t9 = t7 * t3 * t3 - 2 * x3;
+		y3 = (t9 * t6 - t8 * t3 * t3 * t3) * Mod_inverse(2, p);
+		z3 = z1 * z2 * t3;
 	}
 	else {
 		BIGNUM t1, t2, t3;
-		t1 = 3 * x1 % p * x1 % p + a * z1 % p * z1 % p * z1 % p * z1 % p;
-		t2 = 4 * x1 % p * y1 % p * y1 % p;
-		t3 = 8 * y1 % p * y1 % p * y1 % p * y1 % p;
+		t1 = 3 * x1 * x1 + a * z1 * z1 * z1 * z1;
+		t2 = 4 * x1 * y1 * y1;
+		t3 = 8 * y1 * y1 * y1 * y1;
 		//得到R的雅可比坐标
-		x3 = t1 * t1 % p - 2 * t2 % p;
-		y3 = t1 * (t2 - x3) % p - t3;
-		z3 = 2 * y1 % p * z1 % p;
+		x3 = t1 * t1 - 2 * t2;
+		y3 = t1 * (t2 - x3) - t3;
+		z3 = 2 * y1 * z1;
 	}
 	x3 = (x3 % p + p) % p;
 	y3 = (y3 % p + p) % p;
@@ -612,7 +612,7 @@ BIGNUM exgcd(BIGNUM a, BIGNUM b, BIGNUM &x, BIGNUM &y)
 BIGNUM Mod_inverse(BIGNUM a, BIGNUM b)
 {
 	if (a == 2) return BIGNUM("7FFFFFFF7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF800000008000000000000000");
-	Sleep(100);
+	//Sleep(100);
 	BIGNUM x, y;
 	BIGNUM gcd = exgcd(a, b, x, y); //最大公因子可能为1或者-1
 	if (gcd == -1) return 0 - x;
