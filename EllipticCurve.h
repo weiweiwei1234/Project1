@@ -72,6 +72,7 @@ EccPoint EccPointMul1(BIGNUM, EccPoint, EccParams);	//简单循环
 EccPoint EccPointMulBIN(BIGNUM, EccPoint, EccParams);	//将k二进制表示
 EccPoint EccPointMulNAF(BIGNUM, EccPoint, EccParams);	//将k用NAF表示
 EccPoint EccPointMulW_NAF(BIGNUM, EccPoint,int,EccParams); //w-NAF算法
+EccPoint Mul_Montgomery_ladder(BIGNUM, EccPoint, EccParams);//Montgomery ladder算法
 /*
 w-NAF算法 预计算表
 输入：k, P, 窗口宽度w, 椭圆曲线参数C
@@ -96,5 +97,5 @@ BIGNUM Montgomery_Multiply(BIGNUM, BIGNUM, BIGNUM);
 //蒙哥马利约简
 BIGNUM Montgomery_Reduction(BIGNUM, BIGNUM);
 
-BIGNUM random(int); //生成一个随机数 1 < m < n - 1
+BIGNUM random(int,BIGNUM); //生成一个随机数 1 < m < n - 1
 
