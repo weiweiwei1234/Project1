@@ -146,6 +146,40 @@ EccPoint EccPointAdd(EccPoint P, EccPoint Q, EccParams C)
 	return R;
 }
 
+EccPoint EccPointAdd_Montgomery(EccPoint P, EccPoint Q, EccParams C)
+{
+	if (P.x == 0 && P.y == 0) return Q;
+	if (Q.x == 0 && Q.y == 0) return P;
+	EccPoint R; //R=P+Q
+	BIGNUM x1, x2, x3, y1, y2, y3, a, b, p;
+	x1 = P.x;
+	y1 = P.y;
+	x2 = Q.x;
+	y2 = Q.y;
+	a = C.a;
+	b = C.b;
+	p = C.p;
+	BIGNUM k;	//斜率k
+	if (P.x != Q.x) {
+		BIGNUM mod_inv = (Mod_inverse(x2 - x1, p) << 256) % p;
+		k = (y2 - y1) * mod_inv;
+		k = Montgomery_Reduction(k, p);
+	}
+	else {
+		BIGNUM xx = Montgomery_Reduction(x1 * x1, p);
+		BIGNUM mod_inv = (Mod_inverse(2 * y1, p) << 256) % p;
+		k = (3 * x2 + a) * mod_inv;
+		k = Montgomery_Reduction(k, p);
+	}
+	x3 = Montgomery_Reduction(k * k,p) - x1 - x2;
+	y3 = Montgomery_Reduction(k * (x1 - x3),p) - y1;
+	x3 = (x3 % p + p) % p;
+	y3 = (y3 % p + p) % p;
+	R = { x3,y3 };
+	return R;
+	return EccPoint();
+}
+
 //标准射影坐标的两点加 一般不使用
 EccPointStandardProjection EccPointAddStandardProjection(EccPointStandardProjection P, EccPointStandardProjection Q, EccParams C)
 {
@@ -280,6 +314,27 @@ EccPoint EccPointMulBIN(BIGNUM k, EccPoint P, EccParams C)
 		k = k / 2;
 	}
 	return R;
+}
+EccPoint EccPointMul_Montomery(BIGNUM k, EccPoint P, EccParams C)
+{
+	if (k == 0) return { BIGNUM(0), BIGNUM(0) };
+	if (k == 1) return P;
+	EccPoint R = { BIGNUM(0),BIGNUM(0) };
+	//P的坐标表示转换为蒙哥马利表示
+	P.x = (P.x << 255) % C.p;
+	P.y = (P.y << 255) % C.p;
+	EccPoint L = P;
+	while (k > 0) {
+		if (k % 2 == 1) {
+			R = EccPointAdd_Montgomery(R, L, C);
+		}
+		L = EccPointAdd_Montgomery(L, L, C);
+		k = k / 2;
+	}
+	return R;
+	R.x = Montgomery_Reduction(R.x, C.p);
+	R.y = Montgomery_Reduction(R.y, C.p);
+	return EccPoint();
 }
 //使用NAF算法
 //标量的非相邻表示称为NAF
@@ -630,8 +685,8 @@ BIGNUM Mod_inverse(BIGNUM a, BIGNUM b)
 BIGNUM Montgomery_Multiply(BIGNUM a , BIGNUM b, BIGNUM N)
 {
 	//BIGNUM R = 2 << N.bitlen();
-	BIGNUM a_ = (a << N.bitlen()) % N;
-	BIGNUM b_ = (b << N.bitlen()) % N;
+	BIGNUM a_ = (a << 256) % N;
+	BIGNUM b_ = (b << 256) % N;
 	BIGNUM X = a_ * b_;
 	BIGNUM X1 = Montgomery_Reduction(X, N);
 	BIGNUM y = Montgomery_Reduction(X1, N);
@@ -647,13 +702,35 @@ BIGNUM Montgomery_Multiply(BIGNUM a , BIGNUM b, BIGNUM N)
 //  3.若y>N,则y=y-N; 
 BIGNUM Montgomery_Reduction(BIGNUM X, BIGNUM N)
 {
-	BIGNUM R = BIGNUM(2) << N.bitlen();
-	BIGNUM N_, R_;
+	/*
+	N=FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF
+	R=10000000000000000000000000000000000000000000000000000000000000000
+	N_=-3FFFFFFFE00000001FFFFFFFF00000000FFFFFFFEFFFFFFFFFFFFFFFF
+	R_=3FFFFFFFA00000003FFFFFFFD00000001FFFFFFFA00000006FFFFFFFB
+	*/
+	/*
+	* 	BIGNUM N_, R_;
 	BIGNUM d = exgcd(R, N, R_, N_);
-	if (d == 1) N_ = BIGNUM(0) - N_;
-	else N_ = N_;
-	BIGNUM m = X * N_ % R;
-	BIGNUM y = (X + m * N) >> N.bitlen();//R=2^k y = X + mN >> k
+	if (d == 1) {
+		N_ = BIGNUM(0) - N_;
+		R_ = BIGNUM(0) - R_;
+	}
+	*/
+	//BIGNUM N("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF");
+	BIGNUM R("10000000000000000000000000000000000000000000000000000000000000000");
+	BIGNUM N_("-3FFFFFFFE00000001FFFFFFFF00000000FFFFFFFEFFFFFFFFFFFFFFFF");
+	BIGNUM R_("3FFFFFFFA00000003FFFFFFFD00000001FFFFFFFA00000006FFFFFFFB");
+	
+	/*cout << "N.bitlen=" << N.bitlen() << endl;
+	cout << "N=" << N << endl;
+	cout << "R=" << R << endl;
+	cout << "N_=" << N_ << endl;
+	cout << "R_=" << R_ << endl;*/
+	/*cout << "N*N_-R*R_=" << (N * N_ - R * R_) % N + N << endl;*/
+	BIGNUM t = X * N_;
+	BIGNUM m = t - ((t >> 256) << 256); //取低256位
+	//BIGNUM m = X * N_ % R;
+	BIGNUM y = (X + m * N) >> 256;//R=2^k y = X + mN >> k
 	if (y > N) y = y - N;
 	return y;
 }

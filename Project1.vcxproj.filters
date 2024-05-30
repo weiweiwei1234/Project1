@@ -33,6 +33,9 @@
     <ClCompile Include="BIGINT.h">
       <Filter>头文件</Filter>
     </ClCompile>
+    <ClCompile Include="BIGINT.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SM3.h">

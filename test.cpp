@@ -21,7 +21,57 @@ int main() {
 	EccPointStandardProjection G_SP = AffineToStandardProjection(G);
 	EccPointJacobian G_Jacobian = AffineTOJacobian(G);
 	long t1, t2;//计算运行时间，t1:开始时间,t2:结束时间
+	printEccPoint(EccPointAdd(G, G, C));
+	cout << Mod_inverse(Gx, p) << endl;
+	cout << (Gx + Gy) % p << endl;
+	cout << (Gx - Gy + p) % p << endl;
+	cout << Gx * Gy % p << endl;
+	cout << Montgomery_Multiply(a, b, p) << endl;
+	cout << a * b % p << endl;
+	BIGNUM a_R = (a << 256) % p;
+	BIGNUM b_R = (b << 256) % p;
+	BIGNUM N_R = (p << 256) % p;
+	cout << "a的蒙哥马利表示：" << a_R << endl;
+	cout << "b的蒙哥马利表示：" << b_R << endl;
+	cout << "p的蒙哥马利表示：" << N_R << endl;
+	BIGNUM _a = Mod_inverse(a, p);
+	BIGNUM _a_R = Mod_inverse(a_R, p);
+	cout << _a << endl;
+	cout << (_a_R << 256) % p << endl;
 
+	
+	BIGNUM k = random(64, n);
+	cout << k << endl;
+
+	cout << "\n二进制表示（仿射坐标）：" << endl;
+	t1 = GetTickCount64();
+	EccPointMulBIN(k, G, C);
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
+
+	cout << "\n二进制表示（仿射坐标）：" << endl;
+	t1 = GetTickCount64();
+	EccPointMul_Montomery(k, G, C);
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
+	//cout << a * b << endl;
+	
+	/*
+	cout << Gx * Gy << endl;
+	cout << Gx * Gy % p << endl;
+	cout << Gx + Gy % p << endl;
+	cout << (Gx - Gy + p)%p << endl;
+	*/
+
+
+
+
+
+
+
+
+
+	/*
 	//计算整数基本运算时间
 	long time_random = 0;	//生成随机数
 	long time_add = 0;		//加法
@@ -66,7 +116,7 @@ int main() {
 		time_weiyi += (t2 - t1) / 2;
 
 		t1 = GetTickCount64();
-		Mod_inverse(A, B);
+		//Mod_inverse(A, B);
 		t2 = GetTickCount64();
 		time_inverse += t2 - t1;
 	}
@@ -117,6 +167,12 @@ int main() {
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
 
+	cout << "\n蒙哥马利优化后的二进制表示（仿射坐标）：" << endl;
+	t1 = GetTickCount64();
+
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;  //程序运行的时间得到的时间单位为毫秒 /1000为秒
+
 	cout << "\n使用NAF方法（仿射坐标）：" << endl;
 	t1 = GetTickCount64();
 	EccPointMulNAF(k, G, C);
@@ -164,7 +220,7 @@ int main() {
 	EccPointMul_W_NAF_Jacobian(k, G_Jacobian, 8, C);
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;  
-
+	*/
 	cout << "以上为测试内容。" << endl;
 	return 0;
 }

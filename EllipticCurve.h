@@ -63,6 +63,7 @@ EccPointJacobian AffineTOJacobian(EccPoint);//仿射坐标转换为雅可比坐标
 EccPoint JacobianToAffine(EccPointJacobian, EccParams);//雅可比坐标转换为仿射坐标
 
 EccPoint EccPointAdd(EccPoint, EccPoint, EccParams);	//两点加 仿射坐标
+EccPoint EccPointAdd_Montgomery(EccPoint, EccPoint, EccParams);	//蒙哥马利 两点加 仿射坐标
 EccPointStandardProjection EccPointAddStandardProjection(EccPointStandardProjection, EccPointStandardProjection, EccParams); //两点加 标准射影坐标
 EccPointJacobian EccPointAddJacobian(EccPointJacobian, EccPointJacobian, EccParams);//两点加 
 
@@ -70,6 +71,8 @@ EccPointJacobian EccPointAddJacobian(EccPointJacobian, EccPointJacobian, EccPara
 EccPoint EccPointMul1(BIGNUM, EccPoint, EccParams);	//简单循环
 //加减链方法
 EccPoint EccPointMulBIN(BIGNUM, EccPoint, EccParams);	//将k二进制表示
+EccPoint EccPointMul_Montomery(BIGNUM, EccPoint, EccParams); //蒙哥马利算法优化后的二进制表示方法
+
 EccPoint EccPointMulNAF(BIGNUM, EccPoint, EccParams);	//将k用NAF表示
 EccPoint EccPointMulW_NAF(BIGNUM, EccPoint,int,EccParams); //w-NAF算法
 EccPoint Mul_Montgomery_ladder(BIGNUM, EccPoint, EccParams);//Montgomery ladder算法
@@ -91,11 +94,9 @@ EccPoint EccPointMul4(BIGNUM, EccPoint, EccParams);
 //拓展gcd求逆元
 BIGNUM exgcd(BIGNUM, BIGNUM, BIGNUM&, BIGNUM&);
 BIGNUM Mod_inverse(BIGNUM,BIGNUM);  
-
 //蒙哥马利模乘
 BIGNUM Montgomery_Multiply(BIGNUM, BIGNUM, BIGNUM);
 //蒙哥马利约简
 BIGNUM Montgomery_Reduction(BIGNUM, BIGNUM);
 
 BIGNUM random(int,BIGNUM); //生成一个随机数 1 < m < n - 1
-
