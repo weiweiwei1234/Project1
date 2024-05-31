@@ -21,8 +21,8 @@ int main() {
 	SPoint G_S = Affine_To_StandardProjection(G);
 	JPoint G_J = Affine_To_Jacobian(G);
 	long t1, t2;//计算运行时间，t1:开始时间,t2:结束时间
-	
-	BIGNUM k = Random(64, n);
+	BIGNUM k = BIGNUM(SM3Hash("椭圆曲线密码加速方法研究与实现"));
+	//BIGNUM k = Random(64, n);
 	cout << k << endl;
 	
 	cout << "\n二进制表示（仿射坐标）：" << endl;
@@ -62,6 +62,14 @@ int main() {
 	JPoint result5 = JPoint_Mul_Bin(k, G_J, C);
 	print_JPoint(result5);
 	cout << is_in_Params_J(result5, C) << endl;
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;
+
+	cout << "\n二进制表示（Jacobian加重射影坐标）(蒙哥马利优化）：" << endl;
+	t1 = GetTickCount64();
+	JPoint result51 = JPoint_Mul_Bin_M(k, G_J, C);
+	print_JPoint(result51);
+	cout << is_in_Params_J(result51, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -105,6 +113,14 @@ int main() {
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
+	cout << "\nNAF表示（Jacobian加重射影坐标）（蒙哥马利优化）：" << endl;
+	t1 = GetTickCount64();
+	JPoint result101 = JPoint_Mul_NAF_M(k, G_J, C);
+	print_JPoint(result101);
+	cout << is_in_Params_J(result101, C) << endl;
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;
+
 	cout << "\nwNAF表示（仿射坐标）：" << endl;
 	t1 = GetTickCount64();
 	Point result11 = Point_Mul_wNAF(k, G, C,8);
@@ -142,6 +158,14 @@ int main() {
 	JPoint result15 = JPoint_Mul_wNAF(k, G_J, C,8);
 	cout << is_in_Params_J(result15, C) << endl;
 	print_JPoint(result15);
+	t2 = GetTickCount64();
+	cout << "执行时间：" << t2 - t1 << endl;
+
+	cout << "\nwNAF表示（Jacobian加重射影坐标）(蒙哥马利优化）：" << endl;
+	t1 = GetTickCount64();
+	JPoint result151 = JPoint_Mul_wNAF_M(k, G_J, C, 8);
+	cout << is_in_Params_J(result151, C) << endl;
+	print_JPoint(result151);
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 	/*

@@ -52,6 +52,19 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="说明文档.txt" />
+    <None Include="..\..\..\..\Desktop\论文模板.docx">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\..\..\..\Desktop\毕业论文副稿.docx">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\..\..\..\Desktop\椭圆曲线点乘加速说明文档.docx">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="说明文档.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
 </Project>

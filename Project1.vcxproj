@@ -145,6 +145,11 @@
   <ItemGroup>
     <Text Include="说明文档.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\Desktop\椭圆曲线点乘加速说明文档.docx" />
+    <None Include="..\..\..\..\Desktop\毕业论文副稿.docx" />
+    <None Include="..\..\..\..\Desktop\论文模板.docx" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -136,7 +136,7 @@ BIGNUM EXGCD(BIGNUM a, BIGNUM b, BIGNUM& x, BIGNUM& y)
 BIGNUM INVERSE(BIGNUM a, BIGNUM p) //p--b
 {
 	if (a == 2) return BIGNUM("7FFFFFFF7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF800000008000000000000000");
-	Sleep(100);
+	//Sleep(100);
 	BIGNUM x, y;
 	BIGNUM GCD = EXGCD(a, p, x, y);
 	if (GCD == -1)  x = 0 - x;
@@ -407,6 +407,54 @@ JPoint JPoint_Add(JPoint P, JPoint Q, Params C)
 	return R;
 }
 
+JPoint JPoint_Add_M(JPoint PR, JPoint QR, Params C)
+{
+	if (PR.z == 0) return QR;
+	if (QR.z == 0) return PR;
+	JPoint RR;
+	BIGNUM x1R, x2R, x3R, y1R, y2R, y3R, z1R, z2R, z3R, a, b, p;
+	x1R = PR.x;
+	y1R = PR.y;
+	z1R = PR.z;
+	x2R = QR.x;
+	y2R = QR.y;
+	z2R = QR.z;
+	a = C.a;
+	b = C.b;
+	p = C.p;
+	if (x1R != x2R && y1R != y2R && z1R != z2R) {
+		BIGNUM t1R, t2R, t3R, t4R, t5R, t6R, t7R, t8R, t9R;
+		t1R = M_Reduction(M_Reduction(x1R * z2R, p) * z2R, p);
+		t2R = M_Reduction(M_Reduction(x2R * z1R, p) * z1R, p); 
+		t3R = (t1R - t2R) % p;
+		t4R = M_Reduction(M_Reduction(M_Reduction(y1R * z2R, p) * z2R, p) * z2R, p); 
+		t5R = M_Reduction(M_Reduction(M_Reduction(y2R * z1R, p) * z1R, p) * z1R, p);
+		t6R = (t4R - t5R) % p;
+		t7R = (t1R + t2R) % p;
+		t8R = (t4R + t5R) % p;
+		//得到R的雅可比坐标
+		x3R = (M_Reduction(t6R * t6R, p) - M_Reduction(M_Reduction(t7R * t3R, p) * t3R ,p)) % p;
+		t9R = (M_Reduction(t7R * t3R, p) * t3R % p - 2 * x3R) % p;
+		y3R = (M_Reduction(t9R * t6R, p) - M_Reduction(M_Reduction(M_Reduction(t8R * t3R, p) * t3R, p) * t3R, p) * INVERSE(2, p)) % p;
+		z3R = M_Reduction(M_Reduction(z1R * z2R, p) * t3R, p);
+	}
+	else {
+		BIGNUM t1R, t2R, t3R;
+		t1R = (3 * M_Reduction(x1R * x1R, p) + a * M_Reduction(M_Reduction(M_Reduction(z1R * z1R, p) * z1R, p) * z1R, p)) % p;
+		t2R = (4 * M_Reduction(M_Reduction(x1R * y1R, p) * y1R, p)) % p;
+		t3R = 8 * M_Reduction(M_Reduction(M_Reduction(y1R * y1R, p) * y1R, p) * y1R, p) % p;
+		//得到R的雅可比坐标
+		x3R = (M_Reduction(t1R * t1R, p) - 2 * t2R) % p;
+		y3R = (M_Reduction(t1R * ((t2R - x3R) % p),p) - t3R) % p;
+		z3R = 2 * M_Reduction(y1R * z1R, p) % p;
+	}
+	x3R = (x3R + p) % p;
+	y3R = (y3R + p) % p;
+	z3R = (z3R + p) % p;
+	RR = { x3R,y3R,z3R };
+	return RR;
+}
+
 Point Point_Mul_Bin(BIGNUM k, Point P, Params C)
 {
 	if (k == 0) return { BIGNUM(0), BIGNUM(0) };
@@ -486,6 +534,23 @@ JPoint JPoint_Mul_Bin(BIGNUM k, JPoint P, Params C)
 		L = JPoint_Add(L, L, C);
 		k = k / 2;
 	}
+	return R;
+}
+
+JPoint JPoint_Mul_Bin_M(BIGNUM k, JPoint P, Params C)
+{
+	if (k == 0) return { BIGNUM(1), BIGNUM(1),BIGNUM{0} };
+	if (k == 1) return P;
+	JPoint RR = { BIGNUM(1),BIGNUM(1) ,BIGNUM{0} };
+	JPoint LR = { (P.x << 256) % C.p, (P.y << 256) % C.p,(P.z << 256) % C.p };
+	while (k > 0) {
+		if (k % 2 == 1) {
+			RR = JPoint_Add_M(RR, LR, C);
+		}
+		LR = JPoint_Add_M(LR, LR, C);
+		k = k / 2;
+	}
+	JPoint R = { M_Reduction(RR.x, C.p) ,M_Reduction(RR.y, C.p) ,M_Reduction(RR.z,C.p) };
 	return R;
 }
 
@@ -654,6 +719,41 @@ JPoint JPoint_Mul_NAF(BIGNUM k, JPoint P, Params C)
 		if (NAF_k[j] == -1)
 			R = JPoint_Add(R, _P, C);
 	}
+	return R;
+}
+
+JPoint JPoint_Mul_NAF_M(BIGNUM k, JPoint P, Params C)
+{
+	if (k == 0) return { BIGNUM(1),BIGNUM(1),BIGNUM(0) };
+	if (k == 1) return P;
+	JPoint RR = { BIGNUM(1),BIGNUM(1),BIGNUM(0) };
+	JPoint PR = { (P.x << 256) % C.p, (P.y << 256) % C.p ,(P.z << 256) % C.p };
+	JPoint _PR = { PR.x,0 - PR.y,PR.z };
+	BIGNUM k1 = k;
+	//计算k的NAF值
+	int i = 0;
+	int NAF_k[1025] = { 0 };
+	BIGNUM temp;
+	while (k1 >= 1) {
+		if (k1 % 2 == 1) {
+			temp = 2 - (k1 % 4);
+			k1 = k1 - temp;
+			NAF_k[i] = temp.to_int();
+		}
+		else {
+			NAF_k[i] = 0;
+		}
+		k1 = k1 / 2;
+		i++;
+	}
+	for (int j = i - 1; j >= 0; j--) {
+		RR = JPoint_Add_M(RR, RR, C);
+		if (NAF_k[j] == 1)
+			RR = JPoint_Add_M(RR, P, C);
+		if (NAF_k[j] == -1)
+			RR = JPoint_Add_M(RR, _PR, C);
+	}
+	JPoint R = { M_Reduction(RR.x, C.p) ,M_Reduction(RR.y, C.p),M_Reduction(RR.z,C.p) };
 	return R;
 }
 
@@ -905,6 +1005,57 @@ JPoint JPoint_Mul_wNAF(BIGNUM k, JPoint P, Params C, int w)
 			R = JPoint_Add(R, { Pi[-NAFW[j]].x,0 - Pi[-NAFW[j]].y, Pi[-NAFW[j]].z }, C);
 		}
 	}
+	return R;
+}
+
+JPoint JPoint_Mul_wNAF_M(BIGNUM k, JPoint P, Params C, int w)
+{
+	if (k == 0) return { BIGNUM(1),BIGNUM(1),BIGNUM(0) };
+	if (k == 1) return P;
+	JPoint RR{ BIGNUM(1), BIGNUM(1),BIGNUM(0) };
+	JPoint PR = { (P.x << 256) % C.p, (P.y << 256) % C.p ,(P.z << 256) % C.p };
+	BIGNUM k1 = k;
+
+	long t1, t2;
+	t1 = GetTickCount64();
+	//用w计算预计算表 计算iP i=1,3,5,...,2^(w-1)-1
+	JPoint PRi[1024];
+	JPoint PR_2 = JPoint_Add_M(P, P, C);
+	for (int j = 1; j < (int)pow(2, w); j = j + 2) {
+		if (j == 1) PRi[j] = P;
+		else
+			PRi[j] = JPoint_Add_M(PRi[j - 2], PR_2, C);
+	}
+	t2 = GetTickCount64();
+	cout << "计算预计算表的执行时间：" << t2 - t1 << endl;
+
+	int i = 0;
+	int NAFW[1025] = { 0 };
+	BIGNUM w2((int)pow(2, w));
+	while (k1 >= 1) {
+		if (k1 % 2 == 1) {
+			NAFW[i] = BIGNUM(k1 % w2).to_int();
+			while (NAFW[i] > pow(2, w - 1)) {
+				NAFW[i] = NAFW[i] - pow(2, w);
+			}
+			k1 = k1 - BIGNUM(NAFW[i]);
+		}
+		else {
+			NAFW[i] = 0;
+		}
+		k1 = k1 / 2;
+		i++;
+	}
+	for (int j = i - 1; j >= 0; j--) {
+		RR = JPoint_Add_M(RR, RR, C);
+		if (NAFW[j] > 0) {
+			RR = JPoint_Add_M(RR, PRi[NAFW[j]], C);
+		}
+		if (NAFW[j] < 0) {
+			RR = JPoint_Add_M(RR, { PRi[-NAFW[j]].x,0 - PRi[-NAFW[j]].y, PRi[-NAFW[j]].z }, C);
+		}
+	}
+	JPoint R = { M_Reduction(RR.x, C.p) ,M_Reduction(RR.y, C.p),M_Reduction(RR.z,C.p) };
 	return R;
 }
 
