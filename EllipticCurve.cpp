@@ -334,7 +334,7 @@ EccPoint EccPointMul_Montomery(BIGNUM k, EccPoint P, EccParams C)
 	return R;
 	R.x = Montgomery_Reduction(R.x, C.p);
 	R.y = Montgomery_Reduction(R.y, C.p);
-	return EccPoint();
+	return R;
 }
 //使用NAF算法
 //标量的非相邻表示称为NAF

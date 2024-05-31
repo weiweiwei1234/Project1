@@ -131,6 +131,7 @@
     <ClCompile Include="BIGINT.cpp" />
     <ClCompile Include="BIGINT.h" />
     <ClCompile Include="BIGNUM.cpp" />
+    <ClCompile Include="ECC.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="EllipticCurve.cpp" />
     <ClCompile Include="EllipticCurve.h" />
@@ -138,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BIGNUM.h" />
+    <ClInclude Include="ECC.h" />
     <ClInclude Include="SM3.h" />
   </ItemGroup>
   <ItemGroup>

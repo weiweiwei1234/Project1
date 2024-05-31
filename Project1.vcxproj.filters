@@ -36,12 +36,18 @@
     <ClCompile Include="BIGINT.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ECC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SM3.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="BIGNUM.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ECC.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
