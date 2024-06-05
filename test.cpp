@@ -20,16 +20,30 @@ int main() {
 	Params C = { p,a,b,n,Gx,Gy };
 	SPoint G_S = Affine_To_StandardProjection(G);
 	JPoint G_J = Affine_To_Jacobian(G);
+	cout << (Gx + Gy) % p<< endl;
+	cout << (Gx * Gy) % p<< endl;
+	cout << INVERSE(Gx, p) << endl;
+	print_Point(G);
+	cout << "2*G=" << endl;
+	Point G2 = Point_Add(G, G, C);
+	print_Point(G2);
+	Point G3 = Point_Add(G2, G, C);
+	cout << "3*G=" << endl;
+	print_Point(G3);
+	cout << "kP=" << endl;
+	Point kP = Point_Mul_Bin(a, G, C);
+	print_Point(kP);
+
 	long t1, t2;//计算运行时间，t1:开始时间,t2:结束时间
-	BIGNUM k = BIGNUM(SM3Hash("椭圆曲线密码加速方法研究与实现"));
-	//BIGNUM k = Random(64, n);
+	//BIGNUM k = BIGNUM(SM3Hash("椭圆曲线密码加速方法研究与实现"));
+	BIGNUM k = Random(64, n);
 	cout << k << endl;
 	
 	cout << "\n二进制表示（仿射坐标）：" << endl;
 	t1 = GetTickCount64();
 	Point result1=Point_Mul_Bin(k, G, C);
 	print_Point(result1);
-	cout << is_in_Params(result1, C) << endl;
+	//cout << is_in_Params(result1, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;  
 
@@ -37,7 +51,7 @@ int main() {
 	t1 = GetTickCount64();
 	Point result2 = Point_Mul_Bin_M(k, G, C);
 	print_Point(result2);
-	cout << is_in_Params(result2, C) << endl;
+	//cout << is_in_Params(result2, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -45,7 +59,7 @@ int main() {
 	t1 = GetTickCount64();
 	SPoint result3 = SPoint_Mul_Bin(k, G_S, C);
 	print_SPoint(result3);
-	cout << is_in_Params_S(result3, C) << endl;
+	//cout << is_in_Params_S(result3, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -53,7 +67,7 @@ int main() {
 	t1 = GetTickCount64();
 	SPoint result4 = SPoint_Mul_Bin_M(k, G_S, C);
 	print_SPoint(result4);
-	cout << is_in_Params_S(result4, C) << endl;
+	//cout << is_in_Params_S(result4, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -61,7 +75,7 @@ int main() {
 	t1 = GetTickCount64();
 	JPoint result5 = JPoint_Mul_Bin(k, G_J, C);
 	print_JPoint(result5);
-	cout << is_in_Params_J(result5, C) << endl;
+	//cout << is_in_Params_J(result5, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -69,7 +83,7 @@ int main() {
 	t1 = GetTickCount64();
 	JPoint result51 = JPoint_Mul_Bin_M(k, G_J, C);
 	print_JPoint(result51);
-	cout << is_in_Params_J(result51, C) << endl;
+	//cout << is_in_Params_J(result51, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -77,7 +91,7 @@ int main() {
 	t1 = GetTickCount64();
 	Point result6 = Point_Mul_NAF(k, G, C);
 	print_Point(result6);
-	cout << is_in_Params(result6, C) << endl;
+	//cout << is_in_Params(result6, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -85,7 +99,7 @@ int main() {
 	t1 = GetTickCount64();
 	Point result7 = Point_Mul_NAF_M(k, G, C);
 	print_Point(result7);
-	cout << is_in_Params(result7, C) << endl;
+	//cout << is_in_Params(result7, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -93,7 +107,7 @@ int main() {
 	t1 = GetTickCount64();
 	SPoint result8 = SPoint_Mul_NAF(k, G_S, C);
 	print_SPoint(result8);
-	cout << is_in_Params_S(result8, C) << endl;
+	//cout << is_in_Params_S(result8, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -101,7 +115,7 @@ int main() {
 	t1 = GetTickCount64();
 	SPoint result9 = SPoint_Mul_NAF_M(k, G_S, C);
 	print_SPoint(result9);
-	cout << is_in_Params_S(result9, C) << endl;
+	//cout << is_in_Params_S(result9, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -109,7 +123,7 @@ int main() {
 	t1 = GetTickCount64();
 	JPoint result10 = JPoint_Mul_NAF(k, G_J, C);
 	print_JPoint(result10);
-	cout << is_in_Params_J(result10, C) << endl;
+	//cout << is_in_Params_J(result10, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -117,7 +131,7 @@ int main() {
 	t1 = GetTickCount64();
 	JPoint result101 = JPoint_Mul_NAF_M(k, G_J, C);
 	print_JPoint(result101);
-	cout << is_in_Params_J(result101, C) << endl;
+	//cout << is_in_Params_J(result101, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -125,7 +139,7 @@ int main() {
 	t1 = GetTickCount64();
 	Point result11 = Point_Mul_wNAF(k, G, C,8);
 	print_Point(result11);
-	cout << is_in_Params(result11, C) << endl;
+	//cout << is_in_Params(result11, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -133,7 +147,7 @@ int main() {
 	t1 = GetTickCount64();
 	Point result12 = Point_Mul_wNAF_M(k, G, C,8);
 	print_Point(result12);
-	cout << is_in_Params(result12, C) << endl;
+	//cout << is_in_Params(result12, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -141,7 +155,7 @@ int main() {
 	t1 = GetTickCount64();
 	SPoint result13 = SPoint_Mul_wNAF(k, G_S, C,8);
 	print_SPoint(result13);
-	cout << is_in_Params_S(result13, C) << endl;
+	//cout << is_in_Params_S(result13, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
@@ -149,14 +163,14 @@ int main() {
 	t1 = GetTickCount64();
 	SPoint result14 = SPoint_Mul_wNAF_M(k, G_S, C,8);
 	print_SPoint(result14);
-	cout << is_in_Params_S(result14, C) << endl;
+	//cout << is_in_Params_S(result14, C) << endl;
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
 
 	cout << "\nwNAF表示（Jacobian加重射影坐标）：" << endl;
 	t1 = GetTickCount64();
 	JPoint result15 = JPoint_Mul_wNAF(k, G_J, C,8);
-	cout << is_in_Params_J(result15, C) << endl;
+	//cout << is_in_Params_J(result15, C) << endl;
 	print_JPoint(result15);
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;
@@ -164,7 +178,7 @@ int main() {
 	cout << "\nwNAF表示（Jacobian加重射影坐标）(蒙哥马利优化）：" << endl;
 	t1 = GetTickCount64();
 	JPoint result151 = JPoint_Mul_wNAF_M(k, G_J, C, 8);
-	cout << is_in_Params_J(result151, C) << endl;
+	//cout << is_in_Params_J(result151, C) << endl;
 	print_JPoint(result151);
 	t2 = GetTickCount64();
 	cout << "执行时间：" << t2 - t1 << endl;

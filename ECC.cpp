@@ -434,7 +434,7 @@ JPoint JPoint_Add_M(JPoint PR, JPoint QR, Params C)
 		t8R = (t4R + t5R) % p;
 		//得到R的雅可比坐标
 		x3R = (M_Reduction(t6R * t6R, p) - M_Reduction(M_Reduction(t7R * t3R, p) * t3R ,p)) % p;
-		t9R = (M_Reduction(t7R * t3R, p) * t3R % p - 2 * x3R) % p;
+		t9R = (M_Reduction(M_Reduction(t7R * t3R, p) * t3R,p) - 2 * x3R) % p;
 		y3R = (M_Reduction(t9R * t6R, p) - M_Reduction(M_Reduction(M_Reduction(t8R * t3R, p) * t3R, p) * t3R, p) * INVERSE(2, p)) % p;
 		z3R = M_Reduction(M_Reduction(z1R * z2R, p) * t3R, p);
 	}
